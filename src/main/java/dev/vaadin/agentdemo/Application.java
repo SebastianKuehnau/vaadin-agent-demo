@@ -1,4 +1,4 @@
-package dev.vaadin;
+package dev.vaadin.agentdemo;
 
 import com.vaadin.flow.theme.aura.Aura;
 import org.springframework.boot.SpringApplication;
