@@ -119,7 +119,7 @@ project — no browser and no running server required.
 ### Cost of the generation
 
 | Metric | Value |
-| --- |  |
+| --- | --- |
 | Model | Claude Opus 5 (1M context) |
 | Wall-clock time | 15m 56s |
 | Input tokens | 1.1k |
