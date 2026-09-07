@@ -42,9 +42,42 @@ If you use Claude Code, Cursor, or another AI coding assistant, connect it to th
 # One-time setup — see https://vaadin.com/docs/latest/building-apps/mcp
 ```
 
-On this branch there is no `.mcp.json`: the Vaadin docs tools, the curated skills and the
+`.mcp.json` here is deliberately empty: the Vaadin docs tools, the curated skills and the
 enforcing hooks are all wired up in `.claude/settings.json` instead — see
 [`.claude/README.md`](.claude/README.md) for what each branch configures.
+
+---
+
+## Run the agent in a Docker sandbox
+
+`.sbx/kit/spec.yaml` is a [Docker Sandboxes](https://docs.docker.com/ai/sandboxes/) kit
+(`schemaVersion: "2"`, `kind: mixin`). It runs Claude Code in a container behind a network
+allowlist instead of on the host:
+
+```bash
+sbx run claude --kit ./.sbx/kit .
+```
+
+The agent configuration is *not* in the kit. `.claude/` is committed and the workspace is
+mounted read-write, so the hooks, the permissions allowlist and the
+`vaadin-view-conventions` skill are already inside the sandbox — and the base `claude` kit
+accepts the trust dialog for the workspace, so they take effect without a prompt. The kit
+only adds what that configuration depends on:
+
+| What it adds | Why |
+| --- | --- |
+| `claude plugin install vaadin-skills` and `vaadin-agent-tools` | `.claude/settings.json` only *enables* them; a fresh container still has to fetch them. |
+| `./mvnw -B -ntp test` at create time | The `Stop` hook runs `./mvnw -o test` — **offline**. A fresh sandbox has an empty `~/.m2`, so without pre-warming that hook would block every turn. |
+| `permissions.network.allow` | Maven Central plus `maven.vaadin.com` (the pom's `vaadin-directory` repository), GitHub for the plugin installs, and `vaadin.com` / `mcp.vaadin.com` / `www.javadocs.dev` for the plugins' MCP servers. |
+| `JAVA_HOME` | The base image ships a JDK but leaves it unset. |
+
+No `apt-get` step is needed: the image already ships `jq` (which every hook builds its
+JSON reply with) and `unzip`, and `/usr/lib/jvm/default-java` is JDK 25.
+
+> Tests only — no browser (the tests are browserless) and no npm (`build-frontend` binds
+> to `prepare-package`). To reach the app from the host, add a top-level
+> `ports: [{container: 8080, name: app}]` plus `registry.npmjs.org`, `nodejs.org` and
+> `tools.vaadin.com`.
 
 ---
 
@@ -71,7 +104,7 @@ Nothing under `dev/vaadin/agentdemo/` was written by hand. `MainLayout` and
 `HelloAgentWorldView` was added by a second session on this branch, against the
 conventions the first session left behind.
 
-### What is typical of this branch (`06-custom-skills`)
+### What `06-custom-skills` added
 
 The earlier branches added *knowledge* (docs MCP, Vaadin skills) and *enforcement*
 (hooks). This branch adds **taste**: a project-local skill that writes down how a
@@ -118,18 +151,6 @@ Chrome: the drawer entry renders, empty input shows the field error, and clickin
 **Show** with a name produces the `Hello Agent!` success notification in the
 bottom right corner.
 
-### What it cost
-| Metric | Value |
-| --- | --- |
-| Model | Claude Opus 5 (1M context) |
-| Wall-clock / API time | 5m 34s / 4m 37s |
-| Tokens in / out | 596 / 19.3k |
-| Cache read / write | 4.2m / 168.4k |
-| Cost | 4.27 $ |
-| Tool calls | ~45 |
-
-> Numbers from `/cost` in the Claude Code session.
-
 ---
 
 ## Cost across the branches
@@ -145,7 +166,10 @@ the details; this is the comparison.
 | `03-MCP` | + Vaadin docs MCP server | 4m 43s | 1.89 $ | 3 |
 | `04-skills` | + Vaadin Skills plugin | 14m 2s | 1.90 $ | 5 |
 | `05-tools-hooks` | + agent tools, hooks, permissions | 10m 36s | 6.01 $ | 5 |
-| `06-custom-skills` | + project-local conventions skill | 5m 34s | 4.27 $ | 16 |
+| `06-custom-skills` | + project-local conventions skill | 5m 34s | 4.27 $ | 16* |
+
+\* Two views are under test on this branch, not one: the existing `MessageView`
+and the new `HelloAgentWorldView`, plus the parameterized layout test covering both.
 
 What the numbers show:
 

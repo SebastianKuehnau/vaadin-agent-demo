@@ -1,0 +1,58 @@
+schemaVersion: "2"
+kind: mixin
+name: vaadin-agent-demo
+displayName: vaadin-agent-demo dev environment
+description: JDK toolchain, the project's Claude Code plugins, and a warm Maven repo.
+
+# The agent configuration itself is not here: `.claude/` is committed and the
+# workspace is mounted, so the hooks, permissions and the vaadin-view-conventions
+# skill are already in the sandbox. This kit only adds what they depend on.
+
+requires:
+  agent: claude
+
+environment:
+  variables:
+    # Symlink, not the versioned dir, which names JDK version and CPU arch.
+    JAVA_HOME: "/usr/lib/jvm/default-java"
+
+setup:
+  install:
+    # install the configured claude plugins
+    - command: |
+        set -e
+        export PATH="$HOME/.local/bin:$HOME/.claude/local:$PATH"
+        claude plugin marketplace add vaadin/agent-marketplace || true
+        claude plugin install vaadin-skills@vaadin-marketplace || true
+        claude plugin install vaadin-agent-tools@vaadin-marketplace || true
+      user: "1000"
+      description: Install the vaadin-marketplace plugins the project enables
+
+    # warum up Maven repo
+    - command: |
+        set -e
+        cd "${WORKSPACE_DIR:?WORKSPACE_DIR is unset}"
+        ./mvnw -B -ntp test || true
+      user: "1000"
+      description: Populate ~/.m2 so the offline Stop hook can run
+
+permissions:
+  network:
+    allow:
+      # Maven. No `mvn` in the image; the wrapper downloads it from here.
+      - repo.maven.apache.org
+      - repo1.maven.org
+      - central.sonatype.com
+      - maven.vaadin.com          # pom.xml's vaadin-directory repository
+
+      # git over HTTPS, and how `claude plugin install` fetches. api.github.com
+      # resolves the default branch of the `owner/repo` shorthand.
+      - github.com
+      - api.github.com
+      - codeload.github.com
+      - raw.githubusercontent.com
+
+      # MCP servers the vaadin-skills plugin brings: docs and Javadoc.
+      - vaadin.com
+      - mcp.vaadin.com
+      - www.javadocs.dev
