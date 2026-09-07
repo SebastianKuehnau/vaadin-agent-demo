@@ -113,6 +113,26 @@ The earlier branches added *knowledge* (docs MCP, Vaadin skills), *enforcement*
 (hooks) and *taste* (a project-local conventions skill). This branch adds a
 **design source**: the agent reads the Figma file and builds the view from it.
 
+**The design** — the selected Figma frame, node `1:825`:
+
+![Figma frame "Grid view": the heading Customer Management with a description and
+two actions, a scope tab bar with All, Recent and Favourite, a search field next to
+Status and Advanced buttons, and a four-column customer table inside a bordered
+card headed "Customers (42)"](docs/images/figma.png)
+
+**The result** — `/customers` in the running app:
+
+![The same screen rendered by Vaadin: the view name in the navbar and in the
+drawer next to Message, Aura-themed tabs, a search field with Status and Advanced,
+and a Grid inside an outlined card headed "Customers (42)" listing twelve
+customers](docs/images/vaadin-view.png)
+
+The heading appears exactly once, in the navbar — that is the design decision
+described below. The two visible differences are the theme, not the
+implementation: Aura draws the selected tab as a filled pill instead of Figma's
+underline, and its search field is outlined instead of filled grey. The mock is
+Lumo-based; this app is Aura.
+
 Two pieces have to be set up by hand — neither comes with the checkout:
 
 | Step | What |
