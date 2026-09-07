@@ -1,196 +1,120 @@
-# My Application
+# Vaadin Agent Demo
 
-A Spring Boot + Vaadin project. Build your UI in pure Java — no HTML, no JavaScript.
+A Spring Boot + Vaadin 25 project used as a testbed for one question: **how much
+does an AI coding agent need to know to build a Vaadin view correctly?**
 
-> **New to Vaadin?** The 5-minute [Quickstart](https://vaadin.com/quickstart) walks you from here to your first running app, a live code change, and an AI-assisted edit with Copilot.
+The same feature request is run once per branch, each time with more
+Vaadin-specific context — chat UI, docs MCP, skills, hooks, a project-local
+conventions skill, Figma. Every branch README records what came out and what it
+cost. This page is the overview.
 
----
+![Screenshot of the running app: the "Vaadin Agent Demo" navbar with a drawer
+listing Message and Hello Agent World, a Message text field containing
+"Sebastian" next to a primary "Show notification" button, and the resulting
+notification in the bottom right corner](docs/images/example-view.png)
 
-## Fastest start — no plugin needed
+*The generated `MessageView` plus the layout around it. Nothing under
+`dev/vaadin/agentdemo/` was written by hand.*
 
-From the project folder:
+## Run it
 
 ```bash
 ./mvnw spring-boot:run        # Windows: mvnw.cmd spring-boot:run
 ```
 
-Then open **http://localhost:8080**.
+Then open **http://localhost:8080** — the first start takes ~30 s while Maven
+downloads dependencies. Production build: `./mvnw package && java -jar target/*.jar`.
 
-The first start takes ~30 seconds while Maven downloads dependencies.
-
-> **Port 8080 already in use?** Stop the other process, or set `server.port=8081` in `src/main/resources/application.properties` and open that port instead.
->
-> **To stop the app:** press `Ctrl+C` in the terminal (or the red Stop button if you launched from your IDE).
-
-## Optional upgrade — instant hotswap
-
-Running with `spring-boot:run` works, but Java code changes need a server restart. For **live reload** — edit Java, see it in the browser without restarting — install the **Vaadin plugin** and start the app through it:
-
-- **IntelliJ IDEA:** install *Vaadin* from the JetBrains Marketplace → **Debug using Hotswap Agent** (dropdown next to Run). *Just installed it? Let IntelliJ finish indexing, or restart it, if the menu item isn't there yet.*
-- **VS Code:** install the *Vaadin* extension → **Vaadin: Debug using Hotswap Agent** from the command palette.
-- **Eclipse:** install the *Vaadin* plugin → right-click the project → **Run As → Vaadin Application**.
-
-This is what makes the edit-and-see-it loop feel instant — and it's required for the AI edits in [Vaadin Copilot](https://vaadin.com/docs/latest/tools/copilot).
+> Java changes need a restart with `spring-boot:run`. For live reload, install the
+> **Vaadin plugin** for your IDE and launch through it — see the
+> [Quickstart](https://vaadin.com/quickstart). It is also what
+> [Copilot](https://vaadin.com/docs/latest/tools/copilot)'s AI edits require.
 
 ---
 
-## Ask your AI assistant about Vaadin (optional)
+## The benchmark prompt
 
-If you use Claude Code, Cursor, or another AI coding assistant, connect it to the **Vaadin MCP server** so it answers against real Vaadin docs and the exact API of your installed version — instead of guessing from outdated training data.
+Branches `01` through `05` got the same request, verbatim:
 
-```bash
-# One-time setup — see https://vaadin.com/docs/latest/building-apps/mcp
-```
+> Create a new view with a text field and a button. On click, a notification
+> with the content of the field should appear. The button should be primary,
+> and the notification should be a success message in the bottom right. Empty
+> input should be handled. Add the view to the navigation and write a test for it.
 
-`.mcp.json` here is deliberately empty: the Vaadin docs tools, the curated skills and the
-enforcing hooks are all wired up in `.claude/settings.json` instead — see
-[`.claude/README.md`](.claude/README.md) for what each branch configures.
+`06-custom-skills` ran the same task as a `HelloAgentWorld` variant — name field,
+`Hello <name>!` — so its result sits next to the existing view instead of
+replacing it. `07-figma` ran a different task (a customer management screen from a
+Figma file) and is therefore not part of the cost comparison below.
+
+---
+
+## Your options for agentic Vaadin development
+
+Each row adds to the one above it. Check out the branch to get exactly that setup —
+`.claude/` is committed, so nothing touches your personal `~/.claude/settings.json`.
+
+| Branch | What it adds | Reach for it when |
+| --- | --- | --- |
+| `01-chat-client` | claude.ai in the browser, code pasted into the project by hand | Nothing to install. Fine for a snippet; the copy-paste loop dominates anything larger. |
+| `02-vanilla` | Claude Code in the terminal — file access, Maven, tests, but no Vaadin context | The floor. The agent can verify its own work, but rediscovers the Vaadin 25 API from the jars in `~/.m2`. |
+| `03-MCP` | The **Vaadin docs MCP server** (`https://mcp.vaadin.com/docs`) | Always. The cheapest single upgrade: real Vaadin 25 API and docs instead of training-data guesses. |
+| `04-skills` | The **`vaadin-skills` plugin** — Vaadin 25 primer plus `aura-theme`, `frontend-design`, `vaadin-form-layout` | You want Vaadin's own guidance on structure and theming, which API docs do not carry. |
+| `05-tools-hooks` | **`vaadin-agent-tools`**, three **hooks** (project facts, Aura/Lumo check, test gate) and a permissions allowlist | A rule has to hold even when the agent forgets it. A hook always fires; a skill only might. |
+| `06-custom-skills` | A **project-local skill**, `.claude/skills/vaadin-view-conventions/SKILL.md` | Your codebase has conventions of its own — a reference view, a package layout, a test style — and they should be versioned with the code. |
+| `07-figma` | The **`figma` plugin** plus a project `figma-to-vaadin` skill | The design already exists in Figma and should become a Vaadin view. |
+
+See [`.claude/README.md`](.claude/README.md) for what each branch pins in
+`settings.json`, and what the three hooks actually do.
+
+## What it cost
+
+| Branch | Wall-clock | Cost | Tests |
+| --- | --- | --- | --- |
+| `01-chat-client` | — | not measured | 3 |
+| `02-vanilla` | 15m 56s | 3.60 $ | 6 |
+| `03-MCP` | 4m 43s | 1.89 $ | 3 |
+| `04-skills` | 14m 2s | 1.90 $ | 5 |
+| `05-tools-hooks` | 10m 36s | 6.01 $ | 5 |
+| `06-custom-skills` | 5m 34s | 4.27 $ | 16\* |
+
+\* Two views are under test on `06`, not one, plus a parameterized layout test
+covering both. Test counts are not a quality ranking on their own: `02-vanilla`
+wrote the most tests and needed the most tokens to get there.
+
+- **The chat UI has no measurable token cost** — it runs under the subscription. It
+  also produced the least: no layout, so its `@Menu` entry has nothing to render it,
+  and `/` stays a 404.
+- **The MCP server pays for itself.** Without it the agent burns tokens
+  rediscovering the API — nearly twice the cost of `03-MCP` for a result that still
+  lands in a flat `views/` package.
+- **Skills cost about the same as MCP alone** and add feature-based packaging and
+  theme awareness.
+- **`05-tools-hooks` is the expensive one, and the hooks are not the reason.** The
+  cost sits in what the harness made affordable: verifying every signature against
+  the jars, then starting the app and checking the result in a real browser — the
+  only run in the table where anyone actually saw the feature work.
+
+> Numbers from `/cost` in each session. Wall-clock includes thinking, tool calls
+> and the agent waiting on Maven.
 
 ---
 
 ## Run the agent in a Docker sandbox
 
-`.sbx/kit/spec.yaml` is a [Docker Sandboxes](https://docs.docker.com/ai/sandboxes/) kit
-(`schemaVersion: "2"`, `kind: mixin`). It runs Claude Code in a container behind a network
-allowlist instead of on the host:
+`.sbx/kit/` is a [Docker Sandboxes](https://docs.docker.com/ai/sandboxes/) kit that
+runs Claude Code in a container behind a network allowlist instead of on the host:
 
 ```bash
 sbx run claude --kit ./.sbx/kit .
 ```
 
-The agent configuration is *not* in the kit. `.claude/` is committed and the workspace is
-mounted read-write, so the hooks, the permissions allowlist and the
-`vaadin-view-conventions` skill are already inside the sandbox — and the base `claude` kit
-accepts the trust dialog for the workspace, so they take effect without a prompt. The kit
-only adds what that configuration depends on:
-
-| What it adds | Why |
-| --- | --- |
-| `claude plugin install vaadin-skills` and `vaadin-agent-tools` | `.claude/settings.json` only *enables* them; a fresh container still has to fetch them. |
-| `./mvnw -B -ntp test` at create time | The `Stop` hook runs `./mvnw -o test` — **offline**. A fresh sandbox has an empty `~/.m2`, so without pre-warming that hook would block every turn. |
-| `permissions.network.allow` | Maven Central plus `maven.vaadin.com` (the pom's `vaadin-directory` repository), GitHub for the plugin installs, and `vaadin.com` / `mcp.vaadin.com` / `www.javadocs.dev` for the plugins' MCP servers. |
-| `JAVA_HOME` | The base image ships a JDK but leaves it unset. |
-
-No `apt-get` step is needed: the image already ships `jq` (which every hook builds its
-JSON reply with) and `unzip`, and `/usr/lib/jvm/default-java` is JDK 25.
-
-> Tests only — no browser (the tests are browserless) and no npm (`build-frontend` binds
-> to `prepare-package`). To reach the app from the host, add a top-level
-> `ports: [{container: 8080, name: app}]` plus `registry.npmjs.org`, `nodejs.org` and
-> `tools.vaadin.com`.
-
----
-
-## Build for production
-
-```bash
-./mvnw package
-java -jar target/*.jar
-```
+The agent configuration is not in the kit — `.claude/` is committed and the
+workspace is mounted read-write, so the hooks and skills are already inside. See
+[`.sbx/README.md`](.sbx/README.md) for what the kit adds and why.
 
 ## Learn more
 
 - [Vaadin Quickstart](https://vaadin.com/quickstart) — the 5-minute getting-started path
 - [Components](https://vaadin.com/docs/latest/components) — 50+ UI components, all callable from Java
-- [Vaadin Copilot](https://vaadin.com/docs/latest/tools/copilot) — visual + AI editing in the browser
+- [Vaadin MCP setup](https://vaadin.com/docs/latest/building-apps/mcp) — wire the docs server into your assistant
 - [Full documentation](https://vaadin.com/docs)
-
----
-
-## Demo: these features were generated by Claude Code
-
-Nothing under `dev/vaadin/agentdemo/` was written by hand. `MainLayout` and
-`MessageView` came out of one Claude Code session on the previous branch;
-`HelloAgentWorldView` was added by a second session on this branch, against the
-conventions the first session left behind.
-
-### What `06-custom-skills` added
-
-The earlier branches added *knowledge* (docs MCP, Vaadin skills) and *enforcement*
-(hooks). This branch adds **taste**: a project-local skill that writes down how a
-view in *this* codebase is supposed to look.
-
-| File | Role |
-| --- | --- |
-| `.claude/skills/vaadin-view-conventions/SKILL.md` | The convention document. Points at `MessageView` as the reference implementation, then states the rules: `@Route` + `@PageTitle` + `@Menu` (a view without `@Menu` counts as unfinished), build in the constructor, `var` for locals, typed APIs (`setWidth(16, Unit.EM)`) instead of string literals, no `getStyle().set(...)` for layout, handlers as named `on<Source><Event>` methods wired by method reference, tests that derive their expectations from `MenuConfiguration` instead of hardcoding titles, and `single()` over `first()` so an ambiguous query fails loudly. |
-
-A plugin skill ships someone else's best practice; this one encodes *ours*, and it
-is versioned with the code it governs. Its effect is visible in the diff: the new
-view mirrors the reference view's structure down to the validation strategy, and
-the agent updated an existing test that the new `@Menu` entry would have broken —
-because the skill told it that `single()` is a feature, not an obstacle.
-
-Still active from the branches below: both Vaadin plugins, the permissions
-allowlist, and the three hooks (`SessionStart` project facts, `PostToolUse`
-Aura/Lumo check, `Stop` test gate) — see
-[`.claude/README.md`](.claude/README.md) for the full branch matrix.
-
-### The prompt
-
-> Create a new view names HelloAgentWorld with a text field for a name and a show
-> button. On click, a notification with the content of the field with the Prefix
-> "Hello" and the suffix "!" should appear. The button should be primary, and the
-> notification should be a success message in the bottom right. Empty input should
-> be handled. Add the view to the navigation and write a test for it.
-
-### Current state
-
-Paths relative to `src/{main,test}/java/dev/vaadin/agentdemo/`:
-
-| File | Purpose |
-| --- | --- |
-| `base/ui/MainLayout.java` | `@Layout` `AppLayout` whose `SideNav` is built from `MenuConfiguration.getMenuEntries()`, so every `@Menu` view appears automatically. The navbar shows the current view's name. |
-| `message/ui/view/MessageView.java` | `TextField` + primary `Button`; shows the field content as a success notification in the bottom right. Empty input marks the field invalid instead of notifying. |
-| `helloagentworld/ui/view/HelloAgentWorldView.java` | Same shape, applied to a greeting: `Hello <name>!` as a success notification at `BOTTOM_END`. Blank input marks the field invalid ("Please enter a name") and focuses it; typing clears the error. |
-| `base/ui/MainLayoutTest.java` | Parameterized over both views. The side-nav item is located by the route it links to, derived from `MenuEntry` rather than written out as a string. |
-| `message/ui/view/MessageViewTest.java` | Five browserless tests. |
-| `helloagentworld/ui/view/HelloAgentWorldViewTest.java` | Seven browserless tests: menu registration, greeting text, position, success variant, primary button, empty/blank input, whitespace trimming, error clearing. |
-
-`./mvnw test` — 16 tests green. The agent also ran the app and checked it in
-Chrome: the drawer entry renders, empty input shows the field error, and clicking
-**Show** with a name produces the `Hello Agent!` success notification in the
-bottom right corner.
-
----
-
-## Cost across the branches
-
-The same feature request was run once per branch, against the same project,
-with an increasing amount of Vaadin-specific context. Each branch's README has
-the details; this is the comparison.
-
-| Branch | Setup | Wall-clock | Cost | Tests |
-| --- | --- | --- | --- | --- |
-| `01-chat-client` | claude.ai chat UI, code pasted by hand | — | not measured | 3 |
-| `02-vanilla` | Claude Code, no Vaadin context | 15m 56s | 3.60 $ | 6 |
-| `03-MCP` | + Vaadin docs MCP server | 4m 43s | 1.89 $ | 3 |
-| `04-skills` | + Vaadin Skills plugin | 14m 2s | 1.90 $ | 5 |
-| `05-tools-hooks` | + agent tools, hooks, permissions | 10m 36s | 6.01 $ | 5 |
-| `06-custom-skills` | + project-local conventions skill | 5m 34s | 4.27 $ | 16* |
-
-\* Two views are under test on this branch, not one: the existing `MessageView`
-and the new `HelloAgentWorldView`, plus the parameterized layout test covering both.
-
-What the numbers show:
-
-- **The chat UI has no measurable token cost** — it runs under the subscription,
-  and `/cost` never sees it. It also produced the least: no layout, so the
-  `@Menu` entry it wrote has nothing to render it, and `/` stays a 404.
-- **The MCP server pays for itself.** Without it the agent burns tokens
-  rediscovering the Vaadin 25 API from the jars — nearly twice the cost of
-  `03-MCP` for a result that still lands in a flat `views/` package.
-- **Skills cost about the same as MCP alone** and add what the API docs do not
-  carry: feature-based packaging and theme awareness.
-- **`05-tools-hooks` is the expensive one, and the hooks are not the reason.**
-  The context hook and the permissions allowlist are cheap — they remove
-  searching and approval round-trips. The cost sits in what the harness made
-  affordable: verifying every API signature against the jars, then starting the
-  app and checking the result in a real browser. Roughly 3× the price of
-  `04-skills` for the same five tests — and the only run in the table where
-  anyone actually saw the feature work.
-
-Test counts are not a quality ranking on their own: `02-vanilla` wrote the most
-tests and still needed the most tokens to get there.
-
-> Numbers taken from `/cost` in each Claude Code session. Wall-clock includes
-> thinking, tool calls and the agent waiting on Maven.
