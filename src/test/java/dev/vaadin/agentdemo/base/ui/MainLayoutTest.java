@@ -21,7 +21,7 @@ class MainLayoutTest extends SpringBrowserlessTest {
                 .filter(entry -> entry.menuClass().equals(MessageView.class))
                 .map(MenuEntry::title).findFirst().orElseThrow();
 
-        Assertions.assertEquals(menuName, find(H1.class).single().getText(),
+        Assertions.assertEquals(menuName, viewTitle(),
                 "Navbar title should be the view's name from the side navigation");
     }
 
@@ -31,9 +31,16 @@ class MainLayoutTest extends SpringBrowserlessTest {
 
         SideNavItem item = find(SideNavItem.class).single();
 
-        Assertions.assertEquals(item.getLabel(),
-                find(H1.class).single().getText(),
+        Assertions.assertEquals(item.getLabel(), viewTitle(),
                 "Navbar title and side navigation label should be the same text");
+    }
+
+    /**
+     * The navbar title. Selected by its class name, because the drawer holds
+     * the application name in an H1 as well.
+     */
+    private String viewTitle() {
+        return find(H1.class).withClassName("view-title").single().getText();
     }
 
 }
