@@ -9,7 +9,7 @@ import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.server.menu.MenuConfiguration;
 import com.vaadin.flow.server.menu.MenuEntry;
-import dev.vaadin.agentdemo.helloagentworld.ui.view.HelloAgentWorldView;
+import dev.vaadin.agentdemo.customer.ui.view.CustomerManagementView;
 import dev.vaadin.agentdemo.message.ui.view.MessageView;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -20,7 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 class MainLayoutTest extends SpringBrowserlessTest {
 
     static Stream<Class<? extends Component>> views() {
-        return Stream.of(MessageView.class, HelloAgentWorldView.class);
+        return Stream.of(MessageView.class, CustomerManagementView.class);
     }
 
     @ParameterizedTest

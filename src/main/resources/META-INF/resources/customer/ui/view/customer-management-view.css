@@ -1,0 +1,54 @@
+/*
+ * Styles for customer/ui/view/CustomerManagementView.java, imported from
+ * styles.css so that the load order relative to the Aura theme is guaranteed.
+ *
+ * The Figma design (node 1:825) uses a 24px page inset, 24px between the page
+ * sections and 16px inside the content section. Those map onto the
+ * theme-agnostic --vaadin-* spacing scale rather than fixed pixel values.
+ */
+
+.customer-management-view {
+    /* Vertical rhythm of the three sections: header, tab bar, content. */
+    gap: var(--vaadin-gap-l);
+    padding-block: var(--vaadin-padding-l);
+}
+
+/*
+ * Each section carries the page inset itself, so the tab bar's bottom border
+ * can still span the full width of the view.
+ */
+.customer-management-view__header,
+.customer-management-view__content {
+    padding-inline: var(--vaadin-padding-l);
+}
+
+/* The inset goes on the tab strip itself, not on the bordered host element. */
+.customer-management-view__tabs::part(tabs) {
+    padding-inline: var(--vaadin-padding-l);
+}
+
+.customer-management-view__description {
+    color: var(--vaadin-text-color-secondary);
+}
+
+.customer-management-view__tabs {
+    border-bottom: 1px solid var(--vaadin-border-color-secondary);
+}
+
+.customer-management-view__content {
+    gap: var(--vaadin-gap-m);
+}
+
+/*
+ * The grid draws its own row padding and spans the card from edge to edge in
+ * the design, so the card's content padding is dropped and re-applied to the
+ * header alone.
+ */
+.customer-management-view__card {
+    /* Unit required: the theme feeds this property into calc() expressions. */
+    --vaadin-card-padding: 0px;
+}
+
+.customer-management-view__card::part(header) {
+    padding: var(--vaadin-padding-m) var(--vaadin-padding-l);
+}
