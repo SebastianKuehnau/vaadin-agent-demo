@@ -61,8 +61,10 @@ Each row adds to the one above it. Check out the branch to get exactly that setu
 | `04-skills` | The **`vaadin-skills` plugin** — Vaadin 25 primer plus `aura-theme`, `frontend-design`, `vaadin-form-layout` | You want Vaadin's own guidance on structure and theming, which API docs do not carry. |
 | `05-tools-hooks` | **`vaadin-agent-tools`**, three **hooks** (project facts, Aura/Lumo check, test gate) and a permissions allowlist | A rule has to hold even when the agent forgets it. A hook always fires; a skill only might. |
 | `06-custom-skills` | A **project-local skill**, `.claude/skills/vaadin-view-conventions/SKILL.md` | Your codebase has conventions of its own — a reference view, a package layout, a test style — and they should be versioned with the code. |
-| `07-figma` | The **`figma` plugin** plus a project `figma-to-vaadin` skill | The design already exists in Figma and should become a Vaadin view. |
+| `07-figma\*` | The **`figma` plugin** plus a project `figma-to-vaadin` skill | The design already exists in Figma and should become a Vaadin view. |
 
+\* Doesn't work with Docker Sandbox at the moment
+  
 See [`.claude/README.md`](.claude/README.md) for what each branch pins in
 `settings.json`, and what the three hooks actually do.
 
