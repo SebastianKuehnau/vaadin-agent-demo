@@ -1,8 +1,10 @@
 package dev.vaadin.agentdemo.message.ui.view;
 
+import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -32,35 +34,41 @@ public class MessageView extends VerticalLayout {
     public MessageView() {
         message = new TextField("Message");
         message.setPlaceholder("Type something");
-        message.setWidth("16em");
+        message.setWidth(16, Unit.EM);
         message.setRequiredIndicatorVisible(true);
         message.setErrorMessage(EMPTY_INPUT_ERROR);
         // The view validates on click, so the field must not validate itself.
         message.setManualValidation(true);
         message.setValueChangeMode(ValueChangeMode.EAGER);
-        message.addValueChangeListener(event -> message.setInvalid(false));
+        message.addValueChangeListener(this::onMessageValueChange);
 
-        show = new Button("Show notification", event -> showNotification());
+        show = new Button("Show notification", this::onShowButtonClicked);
         show.addThemeVariants(ButtonVariant.PRIMARY);
 
-        HorizontalLayout controls = new HorizontalLayout(message, show);
+        var controls = new HorizontalLayout(message, show);
         controls.setAlignItems(Alignment.BASELINE);
 
-        add(new H2("Message"), controls);
+        add(controls);
     }
 
-    private void showNotification() {
-        String text = message.getValue().trim();
+    private void onShowButtonClicked(ClickEvent<Button> buttonClickEvent) {
+        var text = message.getValue().trim();
         if (text.isEmpty()) {
             message.setInvalid(true);
             message.focus();
             return;
         }
 
-        message.setInvalid(false);
-        Notification notification = Notification.show(text,
+        showNotification(text);
+    }
+
+    private void showNotification(String text) {
+        var notification = Notification.show(text,
                 NOTIFICATION_DURATION_MS, Notification.Position.BOTTOM_END);
         notification.addThemeVariants(NotificationVariant.SUCCESS);
     }
 
+    private void onMessageValueChange(AbstractField.ComponentValueChangeEvent<TextField, String> textFieldStringComponentValueChangeEvent) {
+        message.setInvalid(false);
+    }
 }
