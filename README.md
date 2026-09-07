@@ -119,7 +119,7 @@ project — no browser and no running server required.
 ### Cost of the generation
 
 | Metric | Value |
-| --- |  |
+| --- | --- |
 | Model | Claude Opus 5 (1M context) |
 | Wall-clock time | 15m 56s |
 | Input tokens | 1.1k |
@@ -129,3 +129,43 @@ project — no browser and no running server required.
 | Tool calls | ~38 (mostly reading the Vaadin 25 API straight from the jars in `~/.m2`) |
 
 > Numbers taken from `/cost` in the Claude Code session.
+
+---
+
+## Cost across the branches
+
+The same feature request was run once per branch, against the same project,
+with an increasing amount of Vaadin-specific context. Each branch's README has
+the details; this is the comparison.
+
+| Branch | Setup | Wall-clock | Cost | Tests |
+| --- | --- | --- | --- | --- |
+| `01-chat-client` | claude.ai chat UI, code pasted by hand | — | not measured | 3 |
+| `02-vanilla` | Claude Code, no Vaadin context | 15m 56s | 3.60 $ | 6 |
+| `03-MCP` | + Vaadin docs MCP server | 4m 43s | 1.89 $ | 3 |
+| `04-skills` | + Vaadin Skills plugin | 14m 2s | 1.90 $ | 5 |
+| `05-tools-hooks` | + agent tools, hooks, permissions | 10m 36s | 6.01 $ | 5 |
+
+What the numbers show:
+
+- **The chat UI has no measurable token cost** — it runs under the subscription,
+  and `/cost` never sees it. It also produced the least: no layout, so the
+  `@Menu` entry it wrote has nothing to render it, and `/` stays a 404.
+- **The MCP server pays for itself.** Without it the agent burns tokens
+  rediscovering the Vaadin 25 API from the jars — nearly twice the cost of
+  `03-MCP` for a result that still lands in a flat `views/` package.
+- **Skills cost about the same as MCP alone** and add what the API docs do not
+  carry: feature-based packaging and theme awareness.
+- **`05-tools-hooks` is the expensive one, and the hooks are not the reason.**
+  The context hook and the permissions allowlist are cheap — they remove
+  searching and approval round-trips. The cost sits in what the harness made
+  affordable: verifying every API signature against the jars, then starting the
+  app and checking the result in a real browser. Roughly 3× the price of
+  `04-skills` for the same five tests — and the only run in the table where
+  anyone actually saw the feature work.
+
+Test counts are not a quality ranking on their own: `02-vanilla` wrote the most
+tests and still needed the most tokens to get there.
+
+> Numbers taken from `/cost` in each Claude Code session. Wall-clock includes
+> thinking, tool calls and the agent waiting on Maven.
