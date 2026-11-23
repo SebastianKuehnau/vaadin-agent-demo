@@ -1,58 +1,91 @@
-schemaVersion: "2"
+# syntax=docker/sandbox-kit:3
+schemaVersion: "3"
 kind: mixin
-name: vaadin-agent-demo
 displayName: vaadin-agent-demo dev environment
-description: JDK toolchain, the project's Claude Code plugins, and a warm Maven repo.
+description: JDK 25 and Maven/GitHub network access.
 
-# The agent configuration itself is not here: `.claude/` is committed and the
-# workspace is mounted, so the hooks, permissions and the vaadin-view-conventions
-# skill are already in the sandbox. This kit only adds what they depend on.
+# vaadin-agent-demo is set by `task-agent --init`. Cosmetic: only shows in `sbx kit inspect`.
+# Deliberately small — add what you need, delete what you don't.
+#
+# Schema v3 (sbx v0.51.0+, issue #43). The first line is load-bearing: without it
+# sbx parses this file as a Dockerfile. This kit is composed with the claude
+# workload (docker.io/sbx/claude, Debian 13), which ships Python, Docker, sudo,
+# jq, git and curl — but no JDK and no Node. To add more, append an install hook:
+#
+#     - description: Install protobuf
+#       user: "0"
+#       command: "apt-get update -qq && apt-get install -y -qq protobuf-compiler"
+#
+# Install hooks see only PATH, HOME and a few shell basics; any other variable
+# must be listed in the hook's `env:`.
 
-requires:
-  agent: claude
+# v3 has no `environment:` block; a container variable is an arg with `env:`.
+args:
+  # A symlink, not the versioned dir, which names both JDK version and CPU
+  # architecture. The install hook below creates it.
+  javaHome:
+    default: /usr/lib/jvm/default-java
+    description: JAVA_HOME inside the sandbox
+    env: JAVA_HOME
 
-environment:
-  variables:
-    # Symlink, not the versioned dir, which names JDK version and CPU arch.
-    JAVA_HOME: "/usr/lib/jvm/default-java"
+capabilities:
+  - type: com.docker.sandbox/network-policy@1
+    config:
+      # Open only while the install hooks run.
+      install:
+        allow:
+          # apt: the two sources the claude image configures.
+          - deb.debian.org
+          - dhi.io
 
-setup:
-  install:
-    # install the configured claude plugins
-    - command: |
-        set -e
-        export PATH="$HOME/.local/bin:$HOME/.claude/local:$PATH"
-        claude plugin marketplace add vaadin/agent-marketplace || true
-        claude plugin install vaadin-skills@vaadin-marketplace || true
-        claude plugin install vaadin-agent-tools@vaadin-marketplace || true
-      user: "1000"
-      description: Install the vaadin-marketplace plugins the project enables
+      runtime:
+        allow:
+          # Maven. No `mvn` in the image; the wrapper downloads it from here.
+          - repo.maven.apache.org
+          - repo1.maven.org
+          - central.sonatype.com
 
-    # warum up Maven repo
-    - command: |
-        set -e
-        cd "${WORKSPACE_DIR:?WORKSPACE_DIR is unset}"
-        ./mvnw -B -ntp test || true
-      user: "1000"
-      description: Populate ~/.m2 so the offline Stop hook can run
+          # git over HTTPS, releases, raw files.
+          - github.com
+          - codeload.github.com
+          - raw.githubusercontent.com
+          - api.github.com
+          - objects.githubusercontent.com
 
-permissions:
-  network:
-    allow:
-      # Maven. No `mvn` in the image; the wrapper downloads it from here.
-      - repo.maven.apache.org
-      - repo1.maven.org
-      - central.sonatype.com
-      - maven.vaadin.com          # pom.xml's vaadin-directory repository
+  - type: com.docker.sandbox/lifecycle@1
+    config:
+      install:
+        # Claude Code is baked into the workload image, and nothing in the
+        # sandbox ever updates it — an image a few weeks old means an agent a
+        # few weeks old (issue #19). This brings it to the current release when
+        # the sandbox is built.
+        #
+        # `|| true` on purpose: an update that cannot reach the network must not
+        # fail sandbox creation. The version from the image still works, so a
+        # best-effort refresh is worth strictly more than a sandbox that refuses
+        # to start when you are offline.
+        - description: Update Claude Code
+          user: "1000"
+          command: "claude update || true"
 
-      # git over HTTPS, and how `claude plugin install` fetches. api.github.com
-      # resolves the default branch of the `owner/repo` shorthand.
-      - github.com
-      - api.github.com
-      - codeload.github.com
-      - raw.githubusercontent.com
+        # The image's ca-certificates-java leaves the JDK's truststore empty until
+        # update-ca-certificates runs; without it every Maven download fails with
+        # "trustAnchors parameter must be non-empty". `default-jdk` would be 21.
+        - description: Install JDK 25
+          user: "0"
+          command: |
+            set -e
+            apt-get update -qq
+            DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends openjdk-25-jdk-headless ca-certificates-java
+            update-ca-certificates -f
+            ln -sfn "$(ls -d /usr/lib/jvm/java-25-openjdk-*)" /usr/lib/jvm/default-java
 
-      # MCP servers the vaadin-skills plugin brings: docs and Javadoc.
-      - vaadin.com
-      - mcp.vaadin.com
-      - www.javadocs.dev
+# Host services are NOT `localhost` — that's the sandbox itself. Reach them at
+# `host.docker.internal`, but allow the port under the loopback name:
+#
+# args:
+#   ollamaHost:
+#     default: http://host.docker.internal:11434
+#     env: OLLAMA_HOST
+# ...and under network-policy@1, config.runtime.allow:
+#       - localhost:11434
