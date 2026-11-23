@@ -12,3 +12,11 @@
 node_modules/
 src/main/frontend/generated/
 vite.generated.ts
+
+# Claude Code configuration is committed with this branch.
+# A global ~/.gitignore_global rule excludes `.claude`, so re-include it here --
+# the directory must be un-ignored before anything inside it can be.
+!.claude/
+!.claude/**
+# ...except personal overrides.
+.claude/settings.local.json
