@@ -122,19 +122,6 @@ wrote the most tests and needed the most tokens to get there.
 
 ---
 
-## Run the agent in a Docker sandbox
-
-`.sbx/kit/` is a [Docker Sandboxes](https://docs.docker.com/ai/sandboxes/) kit that
-runs Claude Code in a container behind a network allowlist instead of on the host:
-
-```bash
-sbx run claude --kit ./.sbx/kit .
-```
-
-The agent configuration is not in the kit — `.claude/` is committed and the
-workspace is mounted read-write, so the hooks and skills are already inside. See
-[`.sbx/README.md`](.sbx/README.md) for what the kit adds and why.
-
 ## Learn more
 
 - [Vaadin Quickstart](https://vaadin.com/quickstart) — the 5-minute getting-started path
