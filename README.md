@@ -38,13 +38,15 @@ layout is still flat, though — that is not something API docs carry.
 
 ## What it cost
 
+> ⚠️ **Measured with an older stack.** This run used Vaadin 25.2.6 and Spring Boot 4.1.0. The project has since moved to Vaadin 25.3.5 and Spring Boot 4.2.0 (see `main`), and the measurement was not repeated — the highlighted rows are not directly comparable to runs on the current versions.
+
 | Metric | Value |
 | --- | --- |
 | Model | Claude Opus 5 (1M context) |
-| Wall-clock / API time | 4m 43s / 3m 2s |
+| **Wall-clock / API time †** | **4m 43s / 3m 2s** |
 | Tokens in / out | 1.5k / 12.7k |
 | Cache read / write | 1.9m / 60.2k |
-| Cost | 1.89 $ |
+| **Cost †** | **1.89 $** |
 | Tool calls | ~30 |
 
-> Numbers from `/cost` in the Claude Code session.
+> † Vaadin 25.2.6 / Spring Boot 4.1.0. Numbers from `/cost` in the Claude Code session.
