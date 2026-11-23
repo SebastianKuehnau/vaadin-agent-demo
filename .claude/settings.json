@@ -54,6 +54,7 @@
   "permissions": {
     "allow": [
       "Bash(./mvnw *)",
+      "Bash(.vaadin/vaadin-dev *)",
       "Bash(mvn *)",
       "Bash(git status*)",
       "Bash(git diff*)",
