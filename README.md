@@ -59,21 +59,23 @@ with a name produces the `Hello Agent!` success notification in the bottom right
 
 ## What it cost
 
-> ⚠️ **Measured with an older stack.** The original run used Vaadin 25.2.6 and Spring Boot 4.1.0 (left column, †). The task was repeated on Vaadin 25.3.5 and Spring Boot 4.2.0, the versions `main` is on now (right column).
+> ⚠️ **Measured with an older stack.** The original run used Vaadin 25.2.6 and Spring Boot 4.1.0 (first column, †). The task was repeated twice on Vaadin 25.3.5 and Spring Boot 4.2.0, the versions `main` is on now: once with the same prompt, once with the sentence *"Use ./mvnw spring-boot:run to start the app and verify the change."* appended.
 
-| Metric | Original run † | Rerun on current stack |
-| --- | --- | --- |
-| Model | Claude Opus 5 (1M context) | Claude Opus 5.5 |
-| Vaadin / Spring Boot | 25.2.6 / 4.1.0 | 25.3.5 / 4.2.0 |
-| **Wall-clock / API time** | **5m 34s / 4m 37s** | **41s / 36s** |
-| Tokens in / out | 596 / 19.3k | 12 / 4.7k |
-| Cache read / write | 4.2m / 168.4k | 207.3k / 42.7k |
-| **Cost** | **4.27 $** | **0.48 $** |
-| Tool calls / turns | ~45 tool calls | 6 turns |
-| Tests | 16 green | 16 green |
-| App started and checked in a browser | yes (Chrome) | no |
+| Metric | Original run † | Rerun, same prompt | Rerun, + app check |
+| --- | --- | --- | --- |
+| Model | Claude Opus 5 (1M context) | Claude Opus 5.5 | Claude Opus 5.5 |
+| Vaadin / Spring Boot | 25.2.6 / 4.1.0 | 25.3.5 / 4.2.0 | 25.3.5 / 4.2.0 |
+| **Wall-clock / API time** | **5m 34s / 4m 37s** | **41s / 36s** | **2m 17s / 1m 9s** |
+| Tokens in / out | 596 / 19.3k | 12 / 4.7k | 34 / 7.7k |
+| Cache read / write | 4.2m / 168.4k | 207.3k / 42.7k | 920.0k / 50.0k |
+| **Cost** | **4.27 $** | **0.48 $** | **0.74 $** |
+| Tool calls / turns | ~45 tool calls | 6 turns | 19 turns |
+| Tests | 16 green | 16 green | 16 green |
+| App started and checked in a browser | yes (Chrome) | no | yes (headless Chromium) |
 
 > † Vaadin 25.2.6 / Spring Boot 4.1.0. Numbers from `/cost` in the Claude Code session.
-> The rerun started from this branch with `HelloAgentWorldView` and its test removed and
-> `pom.xml` raised to the current versions, with the same prompt; numbers from
+> The reruns started from this branch with `HelloAgentWorldView` and its test removed and
+> `pom.xml` raised to the current versions, with the prompt above; numbers from
 > `claude -p --output-format json`. The branch itself stays on 25.2.6 / 4.1.0.
+>
+> The same task with the Vaadin dev loop is on `08-devloop`: 1m 59s, 1.01 $.
