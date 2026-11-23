@@ -36,13 +36,15 @@ The primer is what the API docs alone do not carry: **feature-based packaging**
 
 ## What it cost
 
+> ⚠️ **Measured with an older stack.** This run used Vaadin 25.2.6 and Spring Boot 4.1.0. The project has since moved to Vaadin 25.3.5 and Spring Boot 4.2.0 (see `main`), and the measurement was not repeated — the highlighted rows are not directly comparable to runs on the current versions.
+
 | Metric | Value |
 | --- | --- |
 | Model | Claude Opus 5 (1M context) |
-| Wall-clock / API time | 14m 2s / 2m 49s |
+| **Wall-clock / API time †** | **14m 2s / 2m 49s** |
 | Tokens in / out | 550 / 12.9k |
 | Cache read / write | 1.8m / 68.8k |
-| Cost | 1.90 $ |
+| **Cost †** | **1.90 $** |
 | Tool calls | ~16 |
 
-> Numbers from `/cost` in the Claude Code session.
+> † Vaadin 25.2.6 / Spring Boot 4.1.0. Numbers from `/cost` in the Claude Code session.
