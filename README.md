@@ -35,13 +35,15 @@ flat `views/` package rather than the feature-based structure Vaadin recommends.
 
 ## What it cost
 
+> ⚠️ **Measured with an older stack.** This run used Vaadin 25.2.6 and Spring Boot 4.1.0. The project has since moved to Vaadin 25.3.5 and Spring Boot 4.2.0 (see `main`), and the measurement was not repeated — the highlighted rows are not directly comparable to runs on the current versions.
+
 | Metric | Value |
 | --- | --- |
 | Model | Claude Opus 5 (1M context) |
-| Wall-clock time | 15m 56s |
+| **Wall-clock time †** | **15m 56s** |
 | Tokens in / out | 1.1k / 24.1k |
 | Cache read / write | 4.2m / 88.8k |
-| Cost | 3.60 $ |
+| **Cost †** | **3.60 $** |
 | Tool calls | ~38 |
 
-> Numbers from `/cost` in the Claude Code session.
+> † Vaadin 25.2.6 / Spring Boot 4.1.0. Numbers from `/cost` in the Claude Code session.
