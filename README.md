@@ -62,6 +62,7 @@ Each row adds to the one above it. Check out the branch to get exactly that setu
 | `05-tools-hooks` | **`vaadin-agent-tools`**, three **hooks** (project facts, Aura/Lumo check, test gate) and a permissions allowlist | A rule has to hold even when the agent forgets it. A hook always fires; a skill only might. |
 | `06-custom-skills` | A **project-local skill**, `.claude/skills/vaadin-view-conventions/SKILL.md` | Your codebase has conventions of its own — a reference view, a package layout, a test style — and they should be versioned with the code. |
 | `07-figma`\* | The **`figma` plugin** plus a project `figma-to-vaadin` skill | The design already exists in Figma and should become a Vaadin view. |
+| `08-devloop` | The **Vaadin dev loop** (`.vaadin/vaadin-dev`, Vaadin 25.3) on top of `06` | The agent should verify its edits in the running app — hot-swap and a verdict by exit code instead of restarts and full Maven cycles. |
 
 \* Doesn't work with Docker Sandbox at the moment
   
@@ -70,16 +71,24 @@ See [`.claude/README.md`](.claude/README.md) for what each branch pins in
 
 ## What it cost
 
+> ⚠️ **Rows marked † were measured on an older stack** — Vaadin 25.2.6 and Spring
+> Boot 4.1.0, with Claude Opus 5. The project is now on Vaadin 25.3.5 and Spring
+> Boot 4.2.0; those runs were not repeated. Only `08-devloop` was measured on the
+> current versions, with Claude Opus 5.5.
+
 | Branch | Wall-clock | Cost | Tests |
 | --- | --- | --- | --- |
-| `01-chat-client` | — | not measured | 3 |
-| `02-vanilla` | 15m 56s | 3.60 $ | 6 |
-| `03-MCP` | 4m 43s | 1.89 $ | 3 |
-| `04-skills` | 14m 2s | 1.90 $ | 5 |
-| `05-tools-hooks` | 10m 36s | 6.01 $ | 5 |
-| `06-custom-skills` | 5m 34s | 4.27 $ | 16\* |
+| `01-chat-client` † | — | not measured | 3 |
+| `02-vanilla` † | 15m 56s | 3.60 $ | 6 |
+| `03-MCP` † | 4m 43s | 1.89 $ | 3 |
+| `04-skills` † | 14m 2s | 1.90 $ | 5 |
+| `05-tools-hooks` † | 10m 36s | 6.01 $ | 5 |
+| `06-custom-skills` † | 5m 34s | 4.27 $ | 16\* |
+| **`08-devloop`** | **1m 59s** | **1.01 $** | **17\*** |
 
-\* Two views are under test on `06`, not one, plus a parameterized layout test
+† Vaadin 25.2.6 / Spring Boot 4.1.0, Claude Opus 5.
+
+\* Two views are under test on `06` and `08`, not one, plus a parameterized layout test
 covering both. Test counts are not a quality ranking on their own: `02-vanilla`
 wrote the most tests and needed the most tokens to get there.
 
@@ -94,9 +103,14 @@ wrote the most tests and needed the most tokens to get there.
 - **`05-tools-hooks` is the expensive one, and the hooks are not the reason.** The
   cost sits in what the harness made affordable: verifying every signature against
   the jars, then starting the app and checking the result in a real browser — the
-  only run in the table where anyone actually saw the feature work.
+  only run among `01`–`05` where anyone actually saw the feature work.
+- **The dev loop makes verification cheap.** `08-devloop` ran the `06` task, started
+  the app, hot-swapped the new view and checked it in a headless browser — in under
+  two minutes for about a dollar. Two caveats: it is one run on a newer model and a
+  newer Vaadin, and the prompt had to ask for the dev loop explicitly; without that
+  sentence the agent ignored the installed skill and only ran `./mvnw test`.
 
-> Numbers from `/cost` in each session. Wall-clock includes thinking, tool calls
+> Numbers from `/cost` in each session (`08`: `claude -p --output-format json`). Wall-clock includes thinking, tool calls
 > and the agent waiting on Maven.
 
 ---
