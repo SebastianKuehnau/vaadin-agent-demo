@@ -38,15 +38,17 @@ checked in Chrome: the drawer entry renders, and the notification card carries
 
 ## What it cost
 
+> ⚠️ **Measured with an older stack.** This run used Vaadin 25.2.6 and Spring Boot 4.1.0. The project has since moved to Vaadin 25.3.5 and Spring Boot 4.2.0 (see `main`), and the measurement was not repeated — the highlighted rows are not directly comparable to runs on the current versions.
+
 | Metric | Value |
 | --- | --- |
 | Model | Claude Opus 5 (1M context) |
-| Wall-clock / API time | 10m 36s / 6m 17s |
+| **Wall-clock / API time †** | **10m 36s / 6m 17s** |
 | Tokens in / out | 624 / 24.4k |
 | Cache read / write | 6.5m / 211.7k |
-| Cost | 6.01 $ |
+| **Cost †** | **6.01 $** |
 | Tool calls | ~60 |
 
-> Numbers from `/cost` in the Claude Code session. The hooks are not what makes this
+> † Vaadin 25.2.6 / Spring Boot 4.1.0. Numbers from `/cost` in the Claude Code session. The hooks are not what makes this
 > the most expensive run — verifying every signature against the jars and then
 > checking the result in a real browser is.
