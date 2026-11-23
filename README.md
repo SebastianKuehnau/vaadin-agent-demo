@@ -59,13 +59,15 @@ with a name produces the `Hello Agent!` success notification in the bottom right
 
 ## What it cost
 
+> ⚠️ **Measured with an older stack.** This run used Vaadin 25.2.6 and Spring Boot 4.1.0. The project has since moved to Vaadin 25.3.5 and Spring Boot 4.2.0 (see `main`), and the measurement was not repeated — the highlighted rows are not directly comparable to runs on the current versions.
+
 | Metric | Value |
 | --- | --- |
 | Model | Claude Opus 5 (1M context) |
-| Wall-clock / API time | 5m 34s / 4m 37s |
+| **Wall-clock / API time †** | **5m 34s / 4m 37s** |
 | Tokens in / out | 596 / 19.3k |
 | Cache read / write | 4.2m / 168.4k |
-| Cost | 4.27 $ |
+| **Cost †** | **4.27 $** |
 | Tool calls | ~45 |
 
-> Numbers from `/cost` in the Claude Code session.
+> † Vaadin 25.2.6 / Spring Boot 4.1.0. Numbers from `/cost` in the Claude Code session.
