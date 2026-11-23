@@ -1,1 +1,5 @@
+/* Component stylesheets, in load order. Aura is loaded before this file by
+   @StyleSheet on Application, so these rules win on equal specificity. */
+@import "base/ui/main-layout.css";
+
 /* Add your styles here */

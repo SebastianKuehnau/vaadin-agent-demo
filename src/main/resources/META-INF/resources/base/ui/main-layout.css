@@ -1,0 +1,46 @@
+/*
+ * Styles for base/ui/MainLayout.java, imported from styles.css so that the
+ * load order relative to the Aura theme is guaranteed.
+ *
+ * The drawer header/footer and scroller rules follow vaadin/expo-flow, which
+ * uses the theme-agnostic --vaadin-* base properties.
+ */
+
+vaadin-scroller[slot="drawer"] {
+    padding: var(--vaadin-padding-s);
+}
+
+vaadin-side-nav-item vaadin-icon {
+    padding: 0;
+}
+
+[slot="drawer"]:is(header, footer) {
+    display: flex;
+    align-items: center;
+    gap: var(--vaadin-gap-s);
+    padding-inline: var(--vaadin-padding-m);
+    /*
+     * Give the header the same vertical box as the navbar, so the app name
+     * and the view title sit on one line. The navbar is its documented
+     * padding plus the drawer toggle; the toggle is 2.125rem high in Aura.
+     */
+    padding-block: var(--vaadin-app-layout-navbar-padding-top, var(--vaadin-padding-s))
+    var(--vaadin-app-layout-navbar-padding-bottom, var(--vaadin-padding-s));
+    min-height: 2.125rem;
+    box-sizing: content-box;
+}
+
+[slot="drawer"]:is(header, footer):is(:empty) {
+    display: none;
+}
+
+.app-name {
+    font-size: var(--aura-font-size-xl);
+    font-weight: var(--aura-font-weight-semibold);
+}
+
+.view-title {
+    font-size: var(--aura-font-size-xl);
+    font-weight: var(--aura-font-weight-semibold);
+    margin: 0;
+}

@@ -12,6 +12,8 @@ settings, so each branch pins exactly what it needs.
 | `03-MCP` | plugins `false`, `.mcp.json` wires `https://mcp.vaadin.com/docs` | Vaadin docs MCP, but no curated skills. Tools appear as `mcp__vaadin__*`. |
 | `04-skills` | `vaadin-skills` plugin `true` | Adds the Vaadin 25 primer and the `aura-theme` / `frontend-design` / `vaadin-form-layout` skills on top of MCP. |
 | `05-tools-hooks` | both plugins `true` + `hooks` + `permissions` | Adds the `vaadin-agent-tools` skills and three enforcing hooks. |
+| `06-custom-skills` | + `skills/vaadin-view-conventions/` | Adds a project-local convention document for views — versioned with the code it governs. |
+| `07-figma` | + a project `figma-to-vaadin` skill | The `figma` plugin is installed by hand (`claude plugin install figma@claude-plugins-official`), because it needs an interactive login. |
 
 ## The three hooks on this branch
 
