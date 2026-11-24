@@ -1,129 +1,18 @@
-# Vaadin Agent Demo
+# Vaadin Agent Demo — `baseline`
 
-A Spring Boot + Vaadin 25 project used as a testbed for one question: **how much
-does an AI coding agent need to know to build a Vaadin view correctly?**
+The common starting point of every measured branch. **The `main` branch README
+compares them all** — start there for the overview.
 
-The same feature request is run once per branch, each time with more
-Vaadin-specific context — chat UI, docs MCP, skills, hooks, a project-local
-conventions skill, Figma. Every branch README records what came out and what it
-cost. This page is the overview.
+- Vaadin 25.3.6, Spring Boot 4.2.0, Java 25, Maven 3.9.16 (wrapper 3.3.4).
+- `base/ui/MainLayout.java` builds the side navigation from `@Menu`, so every branch
+  starts from the same layout when the prompt says "add the view to the navigation".
+- No views, no agent configuration (`.claude/`, `.mcp.json`, `.agents/`, `.vaadin/`).
+  `/` shows Vaadin's "No views found" page.
+- One test: `ApplicationTest`, a Spring context smoke test.
 
-![Screenshot of the running app: the "Vaadin Agent Demo" navbar with a drawer
-listing Message and Hello Agent World, a Message text field containing
-"Sebastian" next to a primary "Show notification" button, and the resulting
-notification in the bottom right corner](docs/images/example-view.png)
-
-*The generated `MessageView` plus the layout around it. Nothing under
-`dev/vaadin/agentdemo/` was written by hand.*
-
-## Run it
+Each benchmark branch is `baseline` plus its own configuration (setup commit) plus
+the agent's output (result commit).
 
 ```bash
 ./mvnw spring-boot:run        # Windows: mvnw.cmd spring-boot:run
 ```
-
-Then open **http://localhost:8080** — the first start takes ~30 s while Maven
-downloads dependencies. Production build: `./mvnw package && java -jar target/*.jar`.
-
-> Java changes need a restart with `spring-boot:run`. For live reload, install the
-> **Vaadin plugin** for your IDE and launch through it — see the
-> [Quickstart](https://vaadin.com/quickstart). It is also what
-> [Copilot](https://vaadin.com/docs/latest/tools/copilot)'s AI edits require.
-
----
-
-## The benchmark prompt
-
-Branches `01` through `05` got the same request, verbatim:
-
-> Create a new view with a text field and a button. On click, a notification
-> with the content of the field should appear. The button should be primary,
-> and the notification should be a success message in the bottom right. Empty
-> input should be handled. Add the view to the navigation and write a test for it.
-
-`06-custom-skills` ran the same task as a `HelloAgentWorld` variant — name field,
-`Hello <name>!` — so its result sits next to the existing view instead of
-replacing it. `07-figma` ran a different task (a customer management screen from a
-Figma file) and is therefore not part of the cost comparison below.
-
----
-
-## Your options for agentic Vaadin development
-
-Each row adds to the one above it. Check out the branch to get exactly that setup —
-`.claude/` is committed, so nothing touches your personal `~/.claude/settings.json`.
-
-| Branch | What it adds | Reach for it when |
-| --- | --- | --- |
-| `01-chat-client` | claude.ai in the browser, code pasted into the project by hand | Nothing to install. Fine for a snippet; the copy-paste loop dominates anything larger. |
-| `02-vanilla` | Claude Code in the terminal — file access, Maven, tests, but no Vaadin context | The floor. The agent can verify its own work, but rediscovers the Vaadin 25 API from the jars in `~/.m2`. |
-| `03-MCP` | The **Vaadin docs MCP server** (`https://mcp.vaadin.com/docs`) | Always. The cheapest single upgrade: real Vaadin 25 API and docs instead of training-data guesses. |
-| `04-skills` | The **`vaadin-skills` plugin** — Vaadin 25 primer plus `aura-theme`, `frontend-design`, `vaadin-form-layout` | You want Vaadin's own guidance on structure and theming, which API docs do not carry. |
-| `05-tools-hooks` | **`vaadin-agent-tools`**, three **hooks** (project facts, Aura/Lumo check, test gate) and a permissions allowlist | A rule has to hold even when the agent forgets it. A hook always fires; a skill only might. |
-| `06-custom-skills` | A **project-local skill**, `.claude/skills/vaadin-view-conventions/SKILL.md` | Your codebase has conventions of its own — a reference view, a package layout, a test style — and they should be versioned with the code. |
-| `07-figma`\* | The **`figma` plugin** plus a project `figma-to-vaadin` skill | The design already exists in Figma and should become a Vaadin view. |
-| `08-devloop` | The **Vaadin dev loop** (`.vaadin/vaadin-dev`, Vaadin 25.3) on top of `06` | The agent should verify its edits in the running app — hot-swap and a verdict by exit code instead of restarts and full Maven cycles. |
-
-\* Doesn't work with Docker Sandbox at the moment
-  
-See [`.claude/README.md`](.claude/README.md) for what each branch pins in
-`settings.json`, and what the three hooks actually do.
-
-## What it cost
-
-> ⚠️ **Rows marked † were measured on an older stack** — Vaadin 25.2.6 and Spring
-> Boot 4.1.0, with Claude Opus 5. The project is now on Vaadin 25.3.5 and Spring
-> Boot 4.2.0. Only `06-custom-skills` was repeated on the current versions — once
-> with the original prompt, once with a sentence asking it to start and check the
-> app. Those reruns and `08-devloop` used Claude Opus 5.5.
-
-| Branch | Wall-clock | Cost | Tests |
-| --- | --- | --- | --- |
-| `01-chat-client` † | — | not measured | 3 |
-| `02-vanilla` † | 15m 56s | 3.60 $ | 6 |
-| `03-MCP` † | 4m 43s | 1.89 $ | 3 |
-| `04-skills` † | 14m 2s | 1.90 $ | 5 |
-| `05-tools-hooks` † | 10m 36s | 6.01 $ | 5 |
-| `06-custom-skills` † | 5m 34s | 4.27 $ | 16\* |
-| **`06-custom-skills`** (25.3.5) | **2m 05s** | **1.23 $** | **9\*** |
-| **`08-devloop`** | **1m 07s** | **0.82 $** | **8\*** |
-
-† Vaadin 25.2.6 / Spring Boot 4.1.0, Claude Opus 5.
-
-\* Two views are under test on `06` and `08`, not one, plus a parameterized layout test
-covering both. Test counts are not a quality ranking on their own: `02-vanilla`
-wrote the most tests and needed the most tokens to get there.
-
-- **The chat UI has no measurable token cost** — it runs under the subscription. It
-  also produced the least: no layout, so its `@Menu` entry has nothing to render it,
-  and `/` stays a 404.
-- **The MCP server pays for itself.** Without it the agent burns tokens
-  rediscovering the API — nearly twice the cost of `03-MCP` for a result that still
-  lands in a flat `views/` package.
-- **Skills cost about the same as MCP alone** and add feature-based packaging and
-  theme awareness.
-- **`05-tools-hooks` is the expensive one, and the hooks are not the reason.** The
-  cost sits in what the harness made affordable: verifying every signature against
-  the jars, then starting the app and checking the result in a real browser — the
-  only run among `01`–`05` where anyone actually saw the feature work.
-- **On the current stack, `06` and `08` compare directly** — same task, same
-  model. With the original prompt `06` stops at `./mvnw test` and never starts the
-  app (41s, 0.48 $). Asked to start and check the app, both did the same work —
-  run the app, check the view in a headless browser — `06` with
-  `./mvnw spring-boot:run` in 2m 17s for 0.74 $, `08` with the dev loop in 1m 07s
-  for 0.82 $. The dev loop was a little faster, but not cheaper. These are single
-  runs — too few to say whether either difference holds.
-- **The dev loop has to be asked for.** Without the sentence in the prompt the
-  agent on `08` ignored the installed skill and only ran `./mvnw test`.
-
-> Numbers from `/cost` in each session (`06` reruns and `08`: `claude -p --output-format json`). Wall-clock includes thinking, tool calls
-> and the agent waiting on Maven.
-
----
-
-## Learn more
-
-- [Vaadin Quickstart](https://vaadin.com/quickstart) — the 5-minute getting-started path
-- [Components](https://vaadin.com/docs/latest/components) — 50+ UI components, all callable from Java
-- [Vaadin MCP setup](https://vaadin.com/docs/latest/building-apps/mcp) — wire the docs server into your assistant
-- [Full documentation](https://vaadin.com/docs)
