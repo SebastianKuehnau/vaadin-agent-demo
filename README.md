@@ -86,7 +86,7 @@ See [`.claude/README.md`](.claude/README.md) for what each branch pins in
 | `05-tools-hooks` † | 10m 36s | 6.01 $ | 5 |
 | `06-custom-skills` † | 5m 34s | 4.27 $ | 16\* |
 | **`06-custom-skills`** (25.3.5) | **2m 17s** | **0.74 $** | **16\*** |
-| **`08-devloop`** | **1m 59s** | **1.01 $** | **17\*** |
+| **`08-devloop`** | **1m 07s** | **0.82 $** | **8\*** |
 
 † Vaadin 25.2.6 / Spring Boot 4.1.0, Claude Opus 5.
 
@@ -110,8 +110,8 @@ wrote the most tests and needed the most tokens to get there.
   model. With the original prompt `06` stops at `./mvnw test` and never starts the
   app (41s, 0.48 $). Asked to start and check the app, both did the same work —
   run the app, check the view in a headless browser — `06` with
-  `./mvnw spring-boot:run` in 2m 17s for 0.74 $, `08` with the dev loop in 1m 59s
-  for 1.01 $. The dev loop was a little faster, but not cheaper. These are single
+  `./mvnw spring-boot:run` in 2m 17s for 0.74 $, `08` with the dev loop in 1m 07s
+  for 0.82 $. The dev loop was a little faster, but not cheaper. These are single
   runs — too few to say whether either difference holds.
 - **The dev loop has to be asked for.** Without the sentence in the prompt the
   agent on `08` ignored the installed skill and only ran `./mvnw test`.
