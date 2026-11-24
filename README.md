@@ -37,7 +37,15 @@ Two things the chat route did not deliver:
 Everything landed in a flat package (`dev.vaadin.agentdemo`) instead of the
 feature-based structure Vaadin recommends, and had to be pasted and compiled by hand.
 
-## What it cost
+## Versions
+
+Dependencies updated during the November 2026 refresh: Vaadin 25.3.6, Spring Boot
+4.2.0, Maven 3.9.16 (wrapper 3.3.4). The code is unchanged from the original chat
+session, which ran on Vaadin 25.2.6 / Spring Boot 4.1.0. This branch was **not
+re-measured** — the claude.ai chat UI cannot be automated — so everything below is
+**historical**.
+
+## What it cost (historical)
 
 No numbers: the session ran in the claude.ai chat UI, not in Claude Code, so `/cost`
 never saw it — the usage falls under the subscription.
