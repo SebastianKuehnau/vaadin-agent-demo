@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+
+  "extraKnownMarketplaces": {
+    "vaadin-marketplace": {
+      "source": { "source": "github", "repo": "vaadin/agent-marketplace" }
+    }
+  },
+  "enabledPlugins": {
+    "vaadin-skills@vaadin-marketplace": true,
+    "vaadin-agent-tools@vaadin-marketplace": true
+  },
+
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/project-context.sh\"",
+            "timeout": 15,
+            "statusMessage": "Reading Vaadin project facts"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/vaadin-conventions.sh\"",
+            "timeout": 20,
+            "statusMessage": "Checking Aura/Lumo consistency"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/verify-tests.sh\"",
+            "timeout": 300,
+            "statusMessage": "Running browserless tests"
+          }
+        ]
+      }
+    ]
+  },
+
+  "permissions": {
+    "allow": [
+      "Bash(./mvnw *)",
+      "Bash(mvn *)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git show*)",
+      "Bash(git branch*)",
+      "Bash(git ls-tree*)",
+      "Bash(javap *)",
+      "Bash(unzip -l *)",
+      "Bash(unzip -p *)",
+      "mcp__plugin_vaadin-skills_vaadin__get_vaadin_primer",
+      "mcp__plugin_vaadin-skills_vaadin__search_vaadin_docs",
+      "mcp__plugin_vaadin-skills_vaadin__get_full_document",
+      "mcp__plugin_vaadin-skills_vaadin__get_component_java_api",
+      "mcp__plugin_vaadin-skills_vaadin__get_component_styling",
+      "mcp__plugin_vaadin-skills_vaadin__get_theme_css_properties",
+      "mcp__plugin_vaadin-skills_javadoc__get_javadoc_symbol",
+      "mcp__plugin_vaadin-skills_javadoc__get_source_file"
+    ]
+  }
+}
