@@ -1,11 +1,9 @@
 package dev.vaadin.agentdemo.base.ui;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Header;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.sidenav.SideNav;
@@ -17,73 +15,58 @@ import com.vaadin.flow.server.menu.MenuConfiguration;
 import com.vaadin.flow.server.menu.MenuEntry;
 
 /**
- * The application shell. The drawer holds the application name above the
- * navigation, which is generated from the {@code @Menu} annotations of the
- * views. The navbar sits next to the drawer and shows the drawer toggle
- * followed by the name of the current view.
+ * Application shell. The side navigation is generated from the {@code @Menu}
+ * annotations of the views, so a new view needs no change here. The navbar
+ * shows the name of the current view.
  */
 @Layout
 public class MainLayout extends AppLayout implements AfterNavigationObserver {
 
-    private final H1 viewTitle = new H1();
+    static final String APP_NAME = "Agent Demo";
+
+    private final H1 viewTitle;
 
     public MainLayout() {
-        // Makes the drawer the full-height section, so the navbar starts at
-        // the left edge of the content area instead of the viewport.
         setPrimarySection(Section.DRAWER);
-        addDrawerContent();
-        addHeaderContent();
-    }
 
-    private void addHeaderContent() {
-        var toggle = new DrawerToggle();
-        toggle.setAriaLabel("Menu toggle");
-
+        viewTitle = new H1();
         viewTitle.addClassName("view-title");
+        addToNavbar(new DrawerToggle(), viewTitle);
 
-        addToNavbar(true, toggle, viewTitle);
-    }
-
-    private void addDrawerContent() {
-        var appName = new H1("Vaadin Agent Demo");
+        var appName = new H1(APP_NAME);
         appName.addClassName("app-name");
+        var header = new Header(appName);
+        header.getElement().setAttribute("slot", "drawer");
 
-        addToDrawer(new Header(appName), new Scroller(createNavigation()));
+        var nav = new SideNav();
+        MenuConfiguration.getMenuEntries().stream()
+                .map(this::createNavItem)
+                .forEach(nav::addItem);
+
+        addToDrawer(header, new Scroller(nav));
     }
 
-    private SideNav createNavigation() {
-        var nav = new SideNav();
-        MenuConfiguration.getMenuEntries().forEach(entry -> {
-            SideNavItem item = new SideNavItem(entry.title(),
-                    entry.menuClass());
-            if (entry.icon() != null) {
-                item.setPrefixComponent(new Icon(entry.icon()));
-            }
-            nav.addItem(item);
-        });
-        return nav;
+    private SideNavItem createNavItem(MenuEntry entry) {
+        var item = new SideNavItem(entry.title(), entry.path());
+        if (entry.icon() != null) {
+            item.setPrefixComponent(new Icon(entry.icon()));
+        }
+        return item;
     }
 
     @Override
     public void afterNavigation(AfterNavigationEvent event) {
-        viewTitle.setText(currentViewName());
+        viewTitle.setText(currentViewTitle());
     }
 
-    /**
-     * The name of the current view as listed in the side navigation. Views
-     * without a {@code @Menu} entry fall back to their page title.
-     */
-    private String currentViewName() {
+    private String currentViewTitle() {
         var content = getContent();
-        if (content == null) {
-            return "";
-        }
         return MenuConfiguration.getMenuEntries().stream()
-                .filter(entry -> entry.menuClass().equals(content.getClass()))
+                .filter(entry -> content != null
+                        && entry.menuClass().equals(content.getClass()))
                 .map(MenuEntry::title)
                 .findFirst()
                 .orElseGet(() -> MenuConfiguration.getPageHeader(content)
                         .orElse(""));
     }
-
 }

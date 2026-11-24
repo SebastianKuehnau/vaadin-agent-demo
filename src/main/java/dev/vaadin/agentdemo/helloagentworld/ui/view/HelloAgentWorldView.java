@@ -2,6 +2,7 @@ package dev.vaadin.agentdemo.helloagentworld.ui.view;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -16,18 +17,16 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 /**
- * Greets the name entered in the field with a success notification in the
- * bottom right corner. Empty or blank input is rejected with a field-level
- * error instead of greeting nobody.
+ * Greets the entered name with a success notification ("Hello &lt;name&gt;!")
+ * in the bottom right corner. Empty or blank input is rejected with a
+ * field-level error instead of a notification.
  */
-@Route("hello-agent-world")
+@Route("")
 @PageTitle("Hello Agent World")
-@Menu(title = "Hello Agent World", order = 2, icon = "vaadin:smiley-o")
+@Menu(title = "Hello Agent World", order = 1, icon = "vaadin:hand")
 public class HelloAgentWorldView extends VerticalLayout {
 
     static final String EMPTY_INPUT_ERROR = "Please enter a name";
-    private static final String GREETING_PREFIX = "Hello ";
-    private static final String GREETING_SUFFIX = "!";
     private static final int NOTIFICATION_DURATION_MS = 5000;
 
     final TextField name;
@@ -35,7 +34,7 @@ public class HelloAgentWorldView extends VerticalLayout {
 
     public HelloAgentWorldView() {
         name = new TextField("Name");
-        name.setPlaceholder("Type a name");
+        name.setPlaceholder("Your name");
         name.setWidth(16, Unit.EM);
         name.setRequiredIndicatorVisible(true);
         name.setErrorMessage(EMPTY_INPUT_ERROR);
@@ -46,6 +45,7 @@ public class HelloAgentWorldView extends VerticalLayout {
 
         show = new Button("Show", this::onShowButtonClicked);
         show.addThemeVariants(ButtonVariant.PRIMARY);
+        show.addClickShortcut(Key.ENTER);
 
         var controls = new HorizontalLayout(name, show);
         controls.setAlignItems(Alignment.BASELINE);
@@ -53,20 +53,24 @@ public class HelloAgentWorldView extends VerticalLayout {
         add(controls);
     }
 
+    static String greeting(String name) {
+        return "Hello " + name + "!";
+    }
+
     private void onShowButtonClicked(ClickEvent<Button> event) {
-        var enteredName = name.getValue().trim();
-        if (enteredName.isEmpty()) {
+        var text = name.getValue().trim();
+        if (text.isEmpty()) {
             name.setInvalid(true);
             name.focus();
             return;
         }
 
-        showGreeting(enteredName);
+        showNotification(greeting(text));
     }
 
-    private void showGreeting(String enteredName) {
-        var notification = Notification.show(greetingFor(enteredName),
-                NOTIFICATION_DURATION_MS, Notification.Position.BOTTOM_END);
+    private void showNotification(String text) {
+        var notification = Notification.show(text, NOTIFICATION_DURATION_MS,
+                Notification.Position.BOTTOM_END);
         notification.addThemeVariants(NotificationVariant.SUCCESS);
     }
 
@@ -74,13 +78,4 @@ public class HelloAgentWorldView extends VerticalLayout {
             AbstractField.ComponentValueChangeEvent<TextField, String> event) {
         name.setInvalid(false);
     }
-
-    /**
-     * The greeting shown for a name, so tests and callers do not have to
-     * reassemble the prefix and suffix.
-     */
-    static String greetingFor(String enteredName) {
-        return GREETING_PREFIX + enteredName + GREETING_SUFFIX;
-    }
-
 }

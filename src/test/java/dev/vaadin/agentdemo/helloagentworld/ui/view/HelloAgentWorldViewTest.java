@@ -25,19 +25,28 @@ class HelloAgentWorldViewTest extends SpringBrowserlessTest {
     }
 
     @Test
-    void enterName_clickButton_greetingShownAsSuccessNotificationInBottomRight() {
-        HelloAgentWorldView view = navigate(HelloAgentWorldView.class);
+    void showButton_isPrimary() {
+        var view = navigate(HelloAgentWorldView.class);
+
+        Assertions.assertTrue(
+                view.show.getThemeNames()
+                        .contains(ButtonVariant.PRIMARY.getVariantName()),
+                "Show button should use the primary theme variant");
+    }
+
+    @Test
+    void enterName_clickShow_greetingShownAsSuccessInBottomRight() {
+        var view = navigate(HelloAgentWorldView.class);
 
         test(view.name).setValue("Agent");
         test(view.show).click();
 
-        Notification notification = find(Notification.class).single();
-        Assertions.assertEquals(HelloAgentWorldView.greetingFor("Agent"),
-                test(notification).getText(),
-                "Notification should greet the entered name with prefix and suffix");
+        var notification = find(Notification.class).single();
+        Assertions.assertEquals("Hello Agent!", test(notification).getText(),
+                "Notification should greet the entered name");
         Assertions.assertEquals(Notification.Position.BOTTOM_END,
                 notification.getPosition(),
-                "Notification should appear in the bottom right corner");
+                "Notification should appear in the bottom right");
         Assertions.assertTrue(
                 notification.getThemeNames()
                         .contains(NotificationVariant.SUCCESS.getVariantName()),
@@ -47,18 +56,20 @@ class HelloAgentWorldViewTest extends SpringBrowserlessTest {
     }
 
     @Test
-    void showButton_isPrimary() {
-        HelloAgentWorldView view = navigate(HelloAgentWorldView.class);
+    void nameWithSurroundingWhitespace_clickShow_greetingUsesTrimmedName() {
+        var view = navigate(HelloAgentWorldView.class);
 
-        Assertions.assertTrue(
-                view.show.getThemeNames()
-                        .contains(ButtonVariant.PRIMARY.getVariantName()),
-                "Show button should use the primary theme variant");
+        test(view.name).setValue("  Agent  ");
+        test(view.show).click();
+
+        Assertions.assertEquals("Hello Agent!",
+                test(find(Notification.class).single()).getText(),
+                "Greeting should use the name without surrounding whitespace");
     }
 
     @Test
-    void emptyInput_clickButton_noNotificationAndFieldInvalid() {
-        HelloAgentWorldView view = navigate(HelloAgentWorldView.class);
+    void emptyInput_clickShow_noNotificationAndFieldInvalid() {
+        var view = navigate(HelloAgentWorldView.class);
 
         test(view.show).click();
 
@@ -72,8 +83,8 @@ class HelloAgentWorldViewTest extends SpringBrowserlessTest {
     }
 
     @Test
-    void blankInput_clickButton_noNotificationAndFieldInvalid() {
-        HelloAgentWorldView view = navigate(HelloAgentWorldView.class);
+    void blankInput_clickShow_noNotificationAndFieldInvalid() {
+        var view = navigate(HelloAgentWorldView.class);
 
         test(view.name).setValue("   ");
         test(view.show).click();
@@ -85,27 +96,15 @@ class HelloAgentWorldViewTest extends SpringBrowserlessTest {
     }
 
     @Test
-    void nameWithSurroundingWhitespace_clickButton_greetingIsTrimmed() {
-        HelloAgentWorldView view = navigate(HelloAgentWorldView.class);
-
-        test(view.name).setValue("  Agent  ");
-        test(view.show).click();
-
-        Assertions.assertEquals(HelloAgentWorldView.greetingFor("Agent"),
-                test(find(Notification.class).single()).getText(),
-                "Greeting should not repeat the whitespace around the name");
-    }
-
-    @Test
     void invalidField_typeName_errorCleared() {
-        HelloAgentWorldView view = navigate(HelloAgentWorldView.class);
+        var view = navigate(HelloAgentWorldView.class);
         test(view.show).click();
-        Assertions.assertTrue(view.name.isInvalid());
+        Assertions.assertTrue(view.name.isInvalid(),
+                "Precondition: field is invalid after empty submit");
 
         test(view.name).setValue("Agent");
 
         Assertions.assertFalse(view.name.isInvalid(),
-                "Typing should clear the error");
+                "Typing a name should clear the error");
     }
-
 }

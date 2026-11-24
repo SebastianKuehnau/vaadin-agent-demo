@@ -65,10 +65,10 @@ with a name produces the `Hello Agent!` success notification in the bottom right
 | --- | --- | --- | --- |
 | Model | Claude Opus 5 (1M context) | Claude Opus 5.5 | Claude Opus 5.5 |
 | Vaadin / Spring Boot | 25.2.6 / 4.1.0 | 25.3.5 / 4.2.0 | 25.3.5 / 4.2.0 |
-| **Wall-clock / API time** | **5m 34s / 4m 37s** | **41s / 36s** | **2m 17s / 1m 9s** |
+| **Wall-clock / API time** | **5m 34s / 4m 37s** | **7m 52s / 2m 5s**  | **2m 17s / 1m 9s** |
 | Tokens in / out | 596 / 19.3k | 12 / 4.7k | 34 / 7.7k |
 | Cache read / write | 4.2m / 168.4k | 207.3k / 42.7k | 920.0k / 50.0k |
-| **Cost** | **4.27 $** | **0.48 $** | **0.74 $** |
+| **Cost** | **4.27 $** | **1.23 $** | **0.74 $** |
 | Tool calls / turns | ~45 tool calls | 6 turns | 19 turns |
 | Tests | 16 green | 16 green | 16 green |
 | App started and checked in a browser | yes (Chrome) | no | yes (headless Chromium) |
