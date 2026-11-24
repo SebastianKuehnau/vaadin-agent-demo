@@ -85,7 +85,7 @@ See [`.claude/README.md`](.claude/README.md) for what each branch pins in
 | `04-skills` † | 14m 2s | 1.90 $ | 5 |
 | `05-tools-hooks` † | 10m 36s | 6.01 $ | 5 |
 | `06-custom-skills` † | 5m 34s | 4.27 $ | 16\* |
-| **`06-custom-skills`** (25.3.5) | **2m 05s** | **1.23 $** | **16\*** |
+| **`06-custom-skills`** (25.3.5) | **2m 05s** | **1.23 $** | **9\*** |
 | **`08-devloop`** | **1m 07s** | **0.82 $** | **8\*** |
 
 † Vaadin 25.2.6 / Spring Boot 4.1.0, Claude Opus 5.
