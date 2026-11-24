@@ -20,3 +20,4 @@ vite.generated.ts
 !.claude/**
 # ...except personal overrides.
 .claude/settings.local.json
+/.playwright-mcp/
