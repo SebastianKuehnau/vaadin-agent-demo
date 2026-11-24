@@ -1,0 +1,266 @@
+diff --git a/src/main/java/dev/vaadin/agentdemo/hello/ui/HelloAgentWorldView.java b/src/main/java/dev/vaadin/agentdemo/hello/ui/HelloAgentWorldView.java
+new file mode 100644
+index 0000000..31dd15c
+--- /dev/null
++++ b/src/main/java/dev/vaadin/agentdemo/hello/ui/HelloAgentWorldView.java
+@@ -0,0 +1,54 @@
++package dev.vaadin.agentdemo.hello.ui;
++
++import com.vaadin.flow.component.Key;
++import com.vaadin.flow.component.button.Button;
++import com.vaadin.flow.component.button.ButtonVariant;
++import com.vaadin.flow.component.notification.Notification;
++import com.vaadin.flow.component.notification.NotificationVariant;
++import com.vaadin.flow.component.orderedlayout.FlexComponent;
++import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
++import com.vaadin.flow.component.orderedlayout.VerticalLayout;
++import com.vaadin.flow.component.textfield.TextField;
++import com.vaadin.flow.router.Menu;
++import com.vaadin.flow.router.PageTitle;
++import com.vaadin.flow.router.Route;
++
++/**
++ * Greets the user: enter a name, click <em>Show</em>, and a success
++ * notification says "Hello &lt;name&gt;!". An empty name is rejected on the
++ * field instead.
++ */
++@Route("hello-agent-world")
++@PageTitle("Hello Agent World")
++@Menu(order = 0, icon = "vaadin:hand", title = "Hello Agent World")
++public class HelloAgentWorldView extends VerticalLayout {
++
++    private final TextField name = new TextField("Name");
++
++    public HelloAgentWorldView() {
++        name.setRequiredIndicatorVisible(true);
++        name.setErrorMessage("Please enter a name");
++        name.setClearButtonVisible(true);
++
++        var show = new Button("Show", event -> greet());
++        show.addThemeVariants(ButtonVariant.PRIMARY);
++        show.addClickShortcut(Key.ENTER);
++
++        var row = new HorizontalLayout(name, show);
++        row.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.BASELINE);
++        add(row);
++    }
++
++    private void greet() {
++        var value = name.getValue().strip();
++        if (value.isEmpty()) {
++            name.setInvalid(true);
++            name.focus();
++            return;
++        }
++        name.setInvalid(false);
++        var notification = Notification.show("Hello " + value + "!", 3000,
++                Notification.Position.BOTTOM_END);
++        notification.addThemeVariants(NotificationVariant.SUCCESS);
++    }
++}
+diff --git a/src/test/java/dev/vaadin/agentdemo/hello/ui/HelloAgentWorldPage.java b/src/test/java/dev/vaadin/agentdemo/hello/ui/HelloAgentWorldPage.java
+new file mode 100644
+index 0000000..bda9b92
+--- /dev/null
++++ b/src/test/java/dev/vaadin/agentdemo/hello/ui/HelloAgentWorldPage.java
+@@ -0,0 +1,61 @@
++package dev.vaadin.agentdemo.hello.ui;
++
++import com.vaadin.browserless.BrowserlessUIContext;
++import com.vaadin.flow.component.button.ButtonVariant;
++import com.vaadin.flow.component.notification.Notification;
++import com.vaadin.flow.component.notification.NotificationVariant;
++import com.vaadin.flow.component.sidenav.SideNavItem;
++import com.vaadin.flow.component.textfield.TextField;
++
++/** Where things are on {@link HelloAgentWorldView}. */
++class HelloAgentWorldPage {
++
++    private final BrowserlessUIContext window;
++
++    HelloAgentWorldPage(BrowserlessUIContext window) {
++        this.window = window;
++    }
++
++    void open() {
++        window.navigate(HelloAgentWorldView.class);
++    }
++
++    void enterName(String name) {
++        window.findTextField().withLabel("Name").setValue(name);
++    }
++
++    void clickShow() {
++        window.findButton().withText("Show").click();
++    }
++
++    boolean showIsThePrimaryAction() {
++        return window.findButton().withText("Show")
++                .withTheme(ButtonVariant.PRIMARY).exists();
++    }
++
++    boolean hasNotification() {
++        return window.findNotification().exists();
++    }
++
++    String notification() {
++        return window.findNotification().getText();
++    }
++
++    boolean notificationIsSuccessInBottomRight() {
++        Notification notification = window.findNotification()
++                .withTheme(NotificationVariant.SUCCESS).component();
++        return notification.getPosition() == Notification.Position.BOTTOM_END;
++    }
++
++    /** The error shown on the Name field, or {@code null} if it is valid. */
++    String nameFieldError() {
++        TextField field = window.findTextField().withLabel("Name").component();
++        return field.isInvalid() ? field.getErrorMessage() : null;
++    }
++
++    boolean navigationOffers(String label) {
++        return window.find(SideNavItem.class)
++                .withCondition(item -> label.equals(item.getLabel()))
++                .exists();
++    }
++}
+diff --git a/src/test/java/dev/vaadin/agentdemo/hello/ui/HelloAgentWorldTest.java b/src/test/java/dev/vaadin/agentdemo/hello/ui/HelloAgentWorldTest.java
+new file mode 100644
+index 0000000..86982be
+--- /dev/null
++++ b/src/test/java/dev/vaadin/agentdemo/hello/ui/HelloAgentWorldTest.java
+@@ -0,0 +1,133 @@
++package dev.vaadin.agentdemo.hello.ui;
++
++import static org.junit.jupiter.api.Assertions.assertEquals;
++import static org.junit.jupiter.api.Assertions.assertFalse;
++import static org.junit.jupiter.api.Assertions.assertNull;
++import static org.junit.jupiter.api.Assertions.assertTrue;
++
++import com.vaadin.browserless.BrowserlessApplicationContext;
++import com.vaadin.browserless.SpringBrowserlessApplicationContext;
++import dev.vaadin.agentdemo.Application;
++import org.junit.jupiter.api.AfterEach;
++import org.junit.jupiter.api.BeforeEach;
++import org.junit.jupiter.api.Test;
++import org.springframework.beans.factory.annotation.Autowired;
++import org.springframework.boot.test.context.SpringBootTest;
++import org.springframework.context.ApplicationContext;
++
++@SpringBootTest
++class HelloAgentWorldTest {
++
++    @Autowired
++    ApplicationContext spring;
++
++    BrowserlessApplicationContext app;
++
++    @BeforeEach
++    void openTheApp() {
++        app = SpringBrowserlessApplicationContext.create(spring, Application.class);
++    }
++
++    @AfterEach
++    void closeTheApp() {
++        app.close();
++    }
++
++    @Test
++    void visitorIsGreetedByName() {
++        Visitor visitor = new Visitor();
++
++        visitor.asksToBeGreetedAs("Agent");
++
++        assertTrue(visitor.wasToldThat("Hello Agent!"));
++        assertTrue(visitor.sawASuccessMessageInTheBottomRight());
++    }
++
++    @Test
++    void surroundingSpacesAreNotPartOfTheGreeting() {
++        Visitor visitor = new Visitor();
++
++        visitor.asksToBeGreetedAs("  Agent  ");
++
++        assertTrue(visitor.wasToldThat("Hello Agent!"));
++    }
++
++    @Test
++    void visitorWithoutANameIsAskedForOne() {
++        Visitor visitor = new Visitor();
++
++        visitor.asksToBeGreetedAs("");
++
++        assertFalse(visitor.wasGreeted());
++        assertEquals("Please enter a name", visitor.isAskedOnTheNameField());
++    }
++
++    @Test
++    void visitorWithOnlyBlanksAsNameIsAskedForOne() {
++        Visitor visitor = new Visitor();
++
++        visitor.asksToBeGreetedAs("   ");
++
++        assertFalse(visitor.wasGreeted());
++        assertEquals("Please enter a name", visitor.isAskedOnTheNameField());
++    }
++
++    @Test
++    void visitorWhoFixesAMissingNameIsGreeted() {
++        Visitor visitor = new Visitor();
++
++        visitor.asksToBeGreetedAs("");
++        visitor.asksToBeGreetedAs("Agent");
++
++        assertTrue(visitor.wasToldThat("Hello Agent!"));
++        assertNull(visitor.isAskedOnTheNameField());
++    }
++
++    @Test
++    void greetingIsThePrimaryActionAndListedInTheNavigation() {
++        Visitor visitor = new Visitor();
++
++        assertTrue(visitor.seesShowAsThePrimaryAction());
++        assertTrue(visitor.findsInTheNavigation("Hello Agent World"));
++    }
++
++    /** Actor: a visitor in their own browser window on the greeting view. */
++    class Visitor {
++
++        private final HelloAgentWorldPage page =
++                new HelloAgentWorldPage(app.newUser().newWindow());
++
++        Visitor() {
++            page.open();
++        }
++
++        void asksToBeGreetedAs(String name) {
++            page.enterName(name);
++            page.clickShow();
++        }
++
++        boolean wasGreeted() {
++            return page.hasNotification();
++        }
++
++        boolean wasToldThat(String message) {
++            return message.equals(page.notification());
++        }
++
++        boolean sawASuccessMessageInTheBottomRight() {
++            return page.notificationIsSuccessInBottomRight();
++        }
++
++        String isAskedOnTheNameField() {
++            return page.nameFieldError();
++        }
++
++        boolean seesShowAsThePrimaryAction() {
++            return page.showIsThePrimaryAction();
++        }
++
++        boolean findsInTheNavigation(String label) {
++            return page.navigationOffers(label);
++        }
++    }
++}

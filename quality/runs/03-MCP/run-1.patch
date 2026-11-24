@@ -1,0 +1,146 @@
+diff --git a/src/main/java/dev/vaadin/agentdemo/helloagentworld/HelloAgentWorldView.java b/src/main/java/dev/vaadin/agentdemo/helloagentworld/HelloAgentWorldView.java
+new file mode 100644
+index 0000000..f8ad381
+--- /dev/null
++++ b/src/main/java/dev/vaadin/agentdemo/helloagentworld/HelloAgentWorldView.java
+@@ -0,0 +1,56 @@
++package dev.vaadin.agentdemo.helloagentworld;
++
++import com.vaadin.flow.component.Key;
++import com.vaadin.flow.component.button.Button;
++import com.vaadin.flow.component.button.ButtonVariant;
++import com.vaadin.flow.component.notification.Notification;
++import com.vaadin.flow.component.notification.NotificationVariant;
++import com.vaadin.flow.component.orderedlayout.FlexComponent;
++import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
++import com.vaadin.flow.component.textfield.TextField;
++import com.vaadin.flow.router.Menu;
++import com.vaadin.flow.router.PageTitle;
++import com.vaadin.flow.router.Route;
++
++/**
++ * Greets the entered name with a success notification. Blank input marks the
++ * field as invalid instead of showing a greeting.
++ */
++@Route("hello-agent-world")
++@PageTitle("Hello Agent World")
++@Menu(title = "Hello Agent World", icon = "vaadin:hand", order = 1)
++public class HelloAgentWorldView extends HorizontalLayout {
++
++    static final String EMPTY_NAME_MESSAGE = "Please enter a name";
++
++    final TextField name = new TextField("Your name");
++    final Button show = new Button("Show");
++
++    public HelloAgentWorldView() {
++        setPadding(true);
++        setDefaultVerticalComponentAlignment(FlexComponent.Alignment.BASELINE);
++
++        name.setRequiredIndicatorVisible(true);
++        name.setClearButtonVisible(true);
++        name.addValueChangeListener(e -> name.setInvalid(false));
++
++        show.addThemeVariants(ButtonVariant.PRIMARY);
++        show.addClickShortcut(Key.ENTER);
++        show.addClickListener(e -> greet());
++
++        add(name, show);
++    }
++
++    private void greet() {
++        var value = name.getValue().strip();
++        if (value.isEmpty()) {
++            name.setErrorMessage(EMPTY_NAME_MESSAGE);
++            name.setInvalid(true);
++            name.focus();
++            return;
++        }
++        var notification = Notification.show("Hello " + value + "!", 3000,
++                Notification.Position.BOTTOM_END);
++        notification.addThemeVariants(NotificationVariant.SUCCESS);
++    }
++}
+diff --git a/src/test/java/dev/vaadin/agentdemo/helloagentworld/HelloAgentWorldViewTest.java b/src/test/java/dev/vaadin/agentdemo/helloagentworld/HelloAgentWorldViewTest.java
+new file mode 100644
+index 0000000..99fc676
+--- /dev/null
++++ b/src/test/java/dev/vaadin/agentdemo/helloagentworld/HelloAgentWorldViewTest.java
+@@ -0,0 +1,78 @@
++package dev.vaadin.agentdemo.helloagentworld;
++
++import static org.junit.jupiter.api.Assertions.assertEquals;
++import static org.junit.jupiter.api.Assertions.assertFalse;
++import static org.junit.jupiter.api.Assertions.assertTrue;
++
++import com.vaadin.browserless.SpringBrowserlessTest;
++import com.vaadin.flow.component.button.ButtonVariant;
++import com.vaadin.flow.component.notification.Notification;
++import com.vaadin.flow.component.notification.NotificationVariant;
++import org.junit.jupiter.api.Test;
++import org.springframework.boot.test.context.SpringBootTest;
++
++@SpringBootTest
++class HelloAgentWorldViewTest extends SpringBrowserlessTest {
++
++    @Test
++    void enterName_clickShow_successNotificationShownBottomEnd() {
++        var view = navigate(HelloAgentWorldView.class);
++
++        test(view.name).setValue("Agent");
++        test(view.show).click();
++
++        Notification notification = find(Notification.class).single();
++        assertEquals("Hello Agent!", test(notification).getText());
++        assertEquals(Notification.Position.BOTTOM_END, notification.getPosition());
++        assertTrue(notification.hasThemeName(NotificationVariant.SUCCESS.getVariantName()));
++    }
++
++    @Test
++    void nameIsTrimmed() {
++        var view = navigate(HelloAgentWorldView.class);
++
++        test(view.name).setValue("  Agent  ");
++        test(view.show).click();
++
++        assertEquals("Hello Agent!", test(find(Notification.class).single()).getText());
++    }
++
++    @Test
++    void emptyName_clickShow_noNotificationAndFieldInvalid() {
++        var view = navigate(HelloAgentWorldView.class);
++
++        test(view.show).click();
++
++        assertTrue(find(Notification.class).all().isEmpty());
++        assertTrue(view.name.isInvalid());
++        assertEquals(HelloAgentWorldView.EMPTY_NAME_MESSAGE, view.name.getErrorMessage());
++    }
++
++    @Test
++    void blankName_clickShow_noNotification() {
++        var view = navigate(HelloAgentWorldView.class);
++
++        test(view.name).setValue("   ");
++        test(view.show).click();
++
++        assertTrue(find(Notification.class).all().isEmpty());
++        assertTrue(view.name.isInvalid());
++    }
++
++    @Test
++    void typingAfterError_clearsInvalidState() {
++        var view = navigate(HelloAgentWorldView.class);
++
++        test(view.show).click();
++        test(view.name).setValue("Agent");
++
++        assertFalse(view.name.isInvalid());
++    }
++
++    @Test
++    void showButtonIsPrimary() {
++        var view = navigate(HelloAgentWorldView.class);
++
++        assertTrue(view.show.hasThemeName(ButtonVariant.PRIMARY.getVariantName()));
++    }
++}

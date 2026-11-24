@@ -1,0 +1,170 @@
+diff --git a/src/main/java/dev/vaadin/agentdemo/hello/ui/HelloAgentWorldView.java b/src/main/java/dev/vaadin/agentdemo/hello/ui/HelloAgentWorldView.java
+new file mode 100644
+index 0000000..c418043
+--- /dev/null
++++ b/src/main/java/dev/vaadin/agentdemo/hello/ui/HelloAgentWorldView.java
+@@ -0,0 +1,59 @@
++package dev.vaadin.agentdemo.hello.ui;
++
++import com.vaadin.flow.component.Key;
++import com.vaadin.flow.component.button.Button;
++import com.vaadin.flow.component.button.ButtonVariant;
++import com.vaadin.flow.component.notification.Notification;
++import com.vaadin.flow.component.notification.NotificationVariant;
++import com.vaadin.flow.component.orderedlayout.FlexComponent;
++import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
++import com.vaadin.flow.component.textfield.TextField;
++import com.vaadin.flow.router.Menu;
++import com.vaadin.flow.router.PageTitle;
++import com.vaadin.flow.router.Route;
++
++/**
++ * Greets the user by name. Entering a name and clicking "Show" shows a
++ * success notification saying "Hello &lt;name&gt;!". An empty name is
++ * rejected with an error message on the field.
++ */
++@Route("hello-agent-world")
++@PageTitle("Hello Agent World")
++@Menu(title = "Hello Agent World", icon = "vaadin:hand", order = 1)
++public class HelloAgentWorldView extends HorizontalLayout {
++
++    private final TextField name = new TextField("Name");
++
++    public HelloAgentWorldView() {
++        setPadding(true);
++        setDefaultVerticalComponentAlignment(FlexComponent.Alignment.BASELINE);
++
++        name.setRequiredIndicatorVisible(true);
++        name.setErrorMessage("Please enter a name");
++        name.setClearButtonVisible(true);
++        name.addValueChangeListener(event -> {
++            if (!event.getValue().isBlank()) {
++                name.setInvalid(false);
++            }
++        });
++
++        var show = new Button("Show", event -> greet());
++        show.addThemeVariants(ButtonVariant.PRIMARY);
++        show.addClickShortcut(Key.ENTER);
++
++        add(name, show);
++    }
++
++    private void greet() {
++        var value = name.getValue().trim();
++        if (value.isEmpty()) {
++            name.setInvalid(true);
++            name.focus();
++            return;
++        }
++        name.setInvalid(false);
++        var notification = Notification.show("Hello " + value + "!", 3000,
++                Notification.Position.BOTTOM_END);
++        notification.addThemeVariants(NotificationVariant.SUCCESS);
++    }
++}
+diff --git a/src/test/java/dev/vaadin/agentdemo/hello/ui/HelloAgentWorldViewTest.java b/src/test/java/dev/vaadin/agentdemo/hello/ui/HelloAgentWorldViewTest.java
+new file mode 100644
+index 0000000..0a8d87a
+--- /dev/null
++++ b/src/test/java/dev/vaadin/agentdemo/hello/ui/HelloAgentWorldViewTest.java
+@@ -0,0 +1,99 @@
++package dev.vaadin.agentdemo.hello.ui;
++
++import com.vaadin.browserless.BrowserlessApplicationContext;
++import com.vaadin.browserless.BrowserlessUIContext;
++import com.vaadin.browserless.SpringBrowserlessApplicationContext;
++import com.vaadin.flow.component.notification.Notification;
++import com.vaadin.flow.component.sidenav.SideNavItem;
++import dev.vaadin.agentdemo.base.ui.MainLayout;
++import com.vaadin.flow.component.notification.NotificationVariant;
++import org.junit.jupiter.api.AfterEach;
++import org.junit.jupiter.api.BeforeEach;
++import org.junit.jupiter.api.Test;
++import org.springframework.beans.factory.annotation.Autowired;
++import org.springframework.boot.test.context.SpringBootTest;
++import org.springframework.context.ApplicationContext;
++
++import static org.junit.jupiter.api.Assertions.assertEquals;
++import static org.junit.jupiter.api.Assertions.assertFalse;
++import static org.junit.jupiter.api.Assertions.assertTrue;
++
++@SpringBootTest
++class HelloAgentWorldViewTest {
++
++    @Autowired
++    ApplicationContext spring;
++
++    private BrowserlessApplicationContext app;
++    private BrowserlessUIContext window;
++
++    @BeforeEach
++    void openHelloAgentWorld() {
++        app = SpringBrowserlessApplicationContext.create(spring,
++                HelloAgentWorldView.class, MainLayout.class);
++        window = app.newUser().newWindow();
++        window.navigate(HelloAgentWorldView.class);
++    }
++
++    @AfterEach
++    void close() {
++        app.close();
++    }
++
++    @Test
++    void visitorIsGreetedByName() {
++        enterName("Alice");
++        clickShow();
++
++        var greeting = window.findNotification()
++                .withTheme(NotificationVariant.SUCCESS);
++        assertEquals("Hello Alice!", greeting.getText());
++        assertEquals(Notification.Position.BOTTOM_END,
++                greeting.component().getPosition());
++    }
++
++    @Test
++    void surroundingWhitespaceIsNotPartOfTheGreeting() {
++        enterName("  Bob  ");
++        clickShow();
++
++        assertEquals("Hello Bob!", window.findNotification().getText());
++    }
++
++    @Test
++    void visitorWithoutANameIsAskedToEnterOne() {
++        enterName("   ");
++        clickShow();
++
++        assertFalse(window.findNotification().exists());
++        var field = window.findTextField().withLabel("Name").component();
++        assertTrue(field.isInvalid());
++        assertEquals("Please enter a name", field.getErrorMessage());
++    }
++
++    @Test
++    void visitorCanGreetAfterCorrectingAnEmptyName() {
++        clickShow();
++        enterName("Carol");
++        clickShow();
++
++        assertFalse(window.findTextField().withLabel("Name").component()
++                .isInvalid());
++        assertEquals("Hello Carol!", window.findNotification().getText());
++    }
++
++    @Test
++    void viewIsListedInTheNavigation() {
++        assertTrue(window.find(SideNavItem.class).all().stream()
++                .anyMatch(item -> "Hello Agent World".equals(item.getLabel())
++                        && "hello-agent-world".equals(item.getPath())));
++    }
++
++    private void enterName(String name) {
++        window.findTextField().withLabel("Name").setValue(name);
++    }
++
++    private void clickShow() {
++        window.findButton().withText("Show").click();
++    }
++}

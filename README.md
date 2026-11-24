@@ -119,6 +119,43 @@ Tokens = input + output + cache read + cache write.
 > started without any view. Those two branches therefore had a different starting
 > point. The full record of deviations is in [`REFRESH-REPORT.md`](REFRESH-REPORT.md).
 
+## How good is the code?
+
+All 18 runs were checked afterwards by scripts the agents never saw: an independent
+acceptance test for the nine requirements of the prompt, the `javac` deprecation
+warnings, the `vaadin-agent-tools` theme linter and a scan for Vaadin workarounds.
+Details, per-run tables and the full screenshot gallery: **[`QUALITY.md`](QUALITY.md)**.
+
+| Check (runs out of 3) | `02` | `03` | `04` | `05` | `06`† | `08`† |
+| --- | :---: | :---: | :---: | :---: | :---: | :---: |
+| All 9 prompt requirements met | ✅ 3 | ✅ 3 | ✅ 3 | ✅ 3 | ✅ 3 | ✅ 3 |
+| No deprecated API | ❌ 0 | ✅ 3 | ✅ 3 | ✅ 3 | ✅ 3 | ✅ 3 |
+| Aura only, no theme findings | ✅ 3 | ✅ 3 | ✅ 3 | ✅ 3 | ✅ 3 | ✅ 3 |
+| No workarounds (inline style, JS, raw element) | ✅ 3 | ✅ 3 | ✅ 3 | ✅ 3 | ✅ 3 | ✅ 3 |
+| Required indicator on the field *(not asked for)* | 0 | 2 | 3 | 1 | 3 | 3 |
+| Enter submits *(not asked for)* | 3 | 3 | 3 | 3 | 0 | 0 |
+
+- **Functionally, every branch got it right.** All 18 runs pass all nine acceptance
+  checks, plus trimming and whitespace-only input, which the prompt did not ask for.
+  The acceptance test was validated first against seven deliberately broken views.
+- **The one real defect is deprecated API on `02-vanilla`.** Its tests use the
+  browserless `$(…)` / `$view(…)` lookups, which are deprecated and marked for
+  removal — in all three runs. It is the only branch without access to the Vaadin docs;
+  its API came from the jars in `~/.m2`.
+- **Theme and API hygiene are clean everywhere.** No Lumo API, no `--lumo-*` tokens,
+  no inline styles, no `executeJs`, no string sizes, in any run.
+- **The rest are UX details the prompt leaves open.** `06` and `08` follow their
+  reference view: required indicator, no Enter shortcut (`MessageView` has none).
+  `02`–`05` added an Enter shortcut in every run.
+
+Empty input in the committed run of each branch:
+
+| `02-vanilla` | `03-MCP` | `04-skills` |
+| --- | --- | --- |
+| ![02-vanilla, empty input](docs/gallery/02-vanilla-run-1-empty.jpg) | ![03-MCP, empty input](docs/gallery/03-MCP-run-2-empty.jpg) | ![04-skills, empty input](docs/gallery/04-skills-run-3-empty.jpg) |
+| **`05-tools-hooks`** | **`06-custom-skills`** | **`08-devloop`** |
+| ![05-tools-hooks, empty input](docs/gallery/05-tools-hooks-run-2-empty.jpg) | ![06-custom-skills, empty input](docs/gallery/06-custom-skills-run-2-empty.jpg) | ![08-devloop, empty input](docs/gallery/08-devloop-run-3-empty.jpg) |
+
 ---
 
 ## Learn more

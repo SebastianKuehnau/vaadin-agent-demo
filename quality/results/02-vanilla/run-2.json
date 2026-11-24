@@ -1,0 +1,117 @@
+{
+  "branch": "02-vanilla",
+  "run": "run-2",
+  "files": [
+    "src/main/java/dev/vaadin/agentdemo/hello/ui/HelloAgentWorldView.java",
+    "src/test/java/dev/vaadin/agentdemo/hello/ui/HelloAgentWorldViewTest.java"
+  ],
+  "mainlayout_changed": false,
+  "compiles": true,
+  "deprecations": [
+    {
+      "file": "src/test/java/dev/vaadin/agentdemo/hello/ui/HelloAgentWorldViewTest.java",
+      "line": 27,
+      "symbol": "<T>$view(java.lang.Class<T>)",
+      "for_removal": true
+    },
+    {
+      "file": "src/test/java/dev/vaadin/agentdemo/hello/ui/HelloAgentWorldViewTest.java",
+      "line": 28,
+      "symbol": "<T>$view(java.lang.Class<T>)",
+      "for_removal": true
+    },
+    {
+      "file": "src/test/java/dev/vaadin/agentdemo/hello/ui/HelloAgentWorldViewTest.java",
+      "line": 41,
+      "symbol": "<T>$(java.lang.Class<T>)",
+      "for_removal": true
+    },
+    {
+      "file": "src/test/java/dev/vaadin/agentdemo/hello/ui/HelloAgentWorldViewTest.java",
+      "line": 53,
+      "symbol": "<T>$(java.lang.Class<T>)",
+      "for_removal": true
+    },
+    {
+      "file": "src/test/java/dev/vaadin/agentdemo/hello/ui/HelloAgentWorldViewTest.java",
+      "line": 62,
+      "symbol": "<T>$(java.lang.Class<T>)",
+      "for_removal": true
+    },
+    {
+      "file": "src/test/java/dev/vaadin/agentdemo/hello/ui/HelloAgentWorldViewTest.java",
+      "line": 71,
+      "symbol": "<T>$(java.lang.Class<T>)",
+      "for_removal": true
+    }
+  ],
+  "acceptance": {
+    "b1_blankInputShowsNoGreeting": {
+      "pass": true,
+      "message": null
+    },
+    "b2_nameIsTrimmed": {
+      "pass": true,
+      "message": null
+    },
+    "r1_viewNamedHelloAgentWorldWithRoute": {
+      "pass": true,
+      "message": null
+    },
+    "r2_viewListedInRenderedSideNavigation": {
+      "pass": true,
+      "message": null
+    },
+    "r3_textFieldAndShowButton": {
+      "pass": true,
+      "message": null
+    },
+    "r4_buttonIsPrimary": {
+      "pass": true,
+      "message": null
+    },
+    "r5_greetingTextIsHelloNameExclamation": {
+      "pass": true,
+      "message": null
+    },
+    "r6_notificationIsSuccess": {
+      "pass": true,
+      "message": null
+    },
+    "r7_notificationBottomRight": {
+      "pass": true,
+      "message": null
+    },
+    "r8_emptyInputShowsNoGreeting": {
+      "pass": true,
+      "message": null
+    },
+    "r9_emptyInputGivesVisibleFeedback": {
+      "pass": true,
+      "message": null
+    }
+  },
+  "theme": {
+    "check-aura-usage": {
+      "ok": true,
+      "findings": [],
+      "themes": [
+        "aura"
+      ]
+    },
+    "check-theme-mixing": {
+      "ok": true,
+      "findings": [],
+      "themes": [
+        "aura"
+      ]
+    }
+  },
+  "patterns": {
+    "lumo": [],
+    "inline_style": [],
+    "execute_js": [],
+    "raw_element": [],
+    "string_sizes": []
+  }
+}

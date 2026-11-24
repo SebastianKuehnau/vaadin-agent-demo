@@ -1,0 +1,80 @@
+{
+  "branch": "08-devloop",
+  "run": "run-2",
+  "files": [
+    "src/main/java/dev/vaadin/agentdemo/hello/ui/view/HelloAgentWorldView.java",
+    "src/test/java/dev/vaadin/agentdemo/hello/ui/view/HelloAgentWorldViewTest.java"
+  ],
+  "mainlayout_changed": false,
+  "compiles": true,
+  "deprecations": [],
+  "acceptance": {
+    "b1_blankInputShowsNoGreeting": {
+      "pass": true,
+      "message": null
+    },
+    "b2_nameIsTrimmed": {
+      "pass": true,
+      "message": null
+    },
+    "r1_viewNamedHelloAgentWorldWithRoute": {
+      "pass": true,
+      "message": null
+    },
+    "r2_viewListedInRenderedSideNavigation": {
+      "pass": true,
+      "message": null
+    },
+    "r3_textFieldAndShowButton": {
+      "pass": true,
+      "message": null
+    },
+    "r4_buttonIsPrimary": {
+      "pass": true,
+      "message": null
+    },
+    "r5_greetingTextIsHelloNameExclamation": {
+      "pass": true,
+      "message": null
+    },
+    "r6_notificationIsSuccess": {
+      "pass": true,
+      "message": null
+    },
+    "r7_notificationBottomRight": {
+      "pass": true,
+      "message": null
+    },
+    "r8_emptyInputShowsNoGreeting": {
+      "pass": true,
+      "message": null
+    },
+    "r9_emptyInputGivesVisibleFeedback": {
+      "pass": true,
+      "message": null
+    }
+  },
+  "theme": {
+    "check-aura-usage": {
+      "ok": true,
+      "findings": [],
+      "themes": [
+        "aura"
+      ]
+    },
+    "check-theme-mixing": {
+      "ok": true,
+      "findings": [],
+      "themes": [
+        "aura"
+      ]
+    }
+  },
+  "patterns": {
+    "lumo": [],
+    "inline_style": [],
+    "execute_js": [],
+    "raw_element": [],
+    "string_sizes": []
+  }
+}
